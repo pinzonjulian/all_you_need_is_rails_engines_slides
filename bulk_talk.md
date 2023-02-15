@@ -27,7 +27,7 @@ We come to
 
 ### All you need is Rails (Engines)
 
-Comparmentalising your app using Rails Engines and Packwerk <!-- .element: style="color: gray !important" -->
+Modularising your monolith using Rails Engines and Packwerk <!-- .element: style="color: gray !important" -->
 
 </br>
 
