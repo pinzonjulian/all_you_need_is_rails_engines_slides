@@ -1,0 +1,2055 @@
+
+---
+![Julian playing in a concert](images/julian_in_studio.jpeg)
+
+Notes:
+
+I have been a musician my whole life. I even went to school for it; I studied music and audio engineering. I had always been interested in computers though so through twists and turns in life I ended up teaching myself how to code with my best friend. 
+
+I struggled a lot. 
+
+After decades of being a musician, my mind was simply not wired like the mind of the software engineers I was competing with at job interviews. To this day it still isn't. But what I did know was how to write songs, write music... how to write to simplify complex feelings to put them out into the world.
+
+After some time, I found one of my strengths and differentiators as a software engineer in that: In the design aspect of it. The design of beautiful experiences code. Just like I had spent countless hours searching for the right metaphors to express a feeling, now I also find joy in taking time in finding the right name for an abstraction, or in refactoring code so anyone, at any level can read it and understand it. So that I, with my artistic-wired brain can understand it.
+
+After years of studying Rails and working with it in several companies I reached a point where I was very comfortable building stuff with it. But as those products grew, I started struggling with maintaining that simplicity that I worked towards every day. 
+
+My cherished Rails conventions, the ones that helped me so so much in the beginning, seemed to start working against me. Or me against them.
+
+So I challenged myself to find an solution for it. To reignite my believe in creating beautiful code in Rails. Beautiful systems that are a joy to work in, regardless of their scale.
+
+And I happend to find the answer, in Rails itself.
+
+We come to
+
+
+---
+
+### All you need is Rails (Engines)
+
+Comparmentalising your app using Rails Engines and Packwerk <!-- .element: style="color: gray !important" -->
+
+</br>
+
+A Talk by 
+**Julián Pinzón Eslava**
+
+</br>
+</br>
+
+`@pinzonjulian` <!-- .element: style="color: gray !important; font-size: 1.5rem" -->
+
+---
+
+![Bogota, Colombia](images/bogota.png) <!-- .element: style="max-height: 70vh" -->
+`instagram.com/monzoonphoto` <!-- .element: style="color: gray !important; font-size: 1.5rem" -->
+
+Notes:
+
+I come from the beautiful city of Bogotá, in Colombia.
+This is a photo of the andes mountains, two thousand and six hundred meters over sea level, where my city is built.
+
+But there's something even better than the view:
+
+---
+<div class="r-stack">
+  <img src="images/arepas/1.png">
+  <img class="fragment" src="images/arepas/2.png">
+  <img class="fragment" src="images/arepas/3.png">
+  <img class="fragment" src="images/arepas/4.png">
+  <img class="fragment" src="images/arepas/5.png">
+</div>
+
+Notes:
+Arepas.
+---
+
+#### Thank you
+
+Notes:
+I thank arepas for existing
+
+But I also want to thank the organisers for putting together this amazing conference
+
+and also everyone who has ever posted about engines on the web and published books about it.
+
+---
+
+##### Music universe
+</br>
+</br>
+
+<small>`github.com/pinzonjulian/all_you_need_is_rails_engines`</small>
+
+Notes:
+
+Throughout this talk we'll use a hypothetical music_universe app that helps music teachers organise and plan music lessons for students, send billing reminders etc.
+
+It's my idea though, so don't go building it yourselves after this talk by starring and forking the repo at github.com/pinzonjulian/all_you_need_is_rails_engines
+
+---
+#####  The app we love
+
+```text
+rails new music_universe --asset-pipeline=propshaft
+```
+
+```text
+music_universe/
+    app/
+        models/
+            application_record.rb
+        controllers/
+            application_controller.rb
+        jobs/
+            application_job.rb
+        mailers/
+            application_mailer.rb
+        views/
+            layouts/
+                application.html.erb
+```
+
+Notes:
+ahhh.... The beautiful feeling of a new rails app. 
+
+You run `rails new` and you can almost feel the smell of fresh cookies coming out of your computer.
+
+---
+#####  The app we love
+
+
+```text[|5,7]
+music_universe/
+    app/
+        models/
+            application_record.rb
+            authentication/
+                session.rb
+            authentication.rb
+        controllers/
+            application_controller.rb
+            authentication/
+                sessions_controller.rb
+        [...]
+```
+Notes:
+You start coding and building a way for users to authenticate
+
+[change slide]
+
+ so you you decide to organise that code inside and authentication module
+
+---
+
+####  The monolith you love
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap: 2rem">
+
+```text[5,7,9,11]
+music_universe/
+    app/
+        models/
+            application_record.rb
+            authentication/
+                session.rb
+            billing/
+                [...]
+            lessons/
+                [...]
+            sheet_music/
+                [...]
+        controllers/
+            [...]
+        [...]
+```
+```text[5,7,9,11]
+music_universe/
+    app/
+        controllers/
+            [application_controller.rb
+            authentication/
+                sessions_controller.rb
+            billing/
+                [...]
+            lessons/
+                [...]
+            sheet_music/
+                [...]
+        [...]]
+```
+
+</div>
+
+
+Notes:
+And as times passes by, you start adding more models, controllers, views, jobs... and you're organised so you use modules as a means to tell the reader 
+
+> "this is its own unit and it's related to everything that shares this same module"
+
+
+---
+
+# Good problems
+
+Notes:
+
+Your app is doing well. You have gained traction with teachers and they love your product but you're struggling to retain them because kids nowadays are all about apps so your initial idea of allowing teachers to send homework via email is creating too much friction and your teachers are clamoring for an app for their stuents. 
+
+You know in your gut it is a good idea so you start building it
+
+---
+
+####  The monolith you love
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap: 2rem">
+
+```text[5,7,9,11]
+music_universe/
+    app/
+        models/
+            application_record.rb
+            authentication/
+                session.rb
+            billing/
+                [...]
+            lessons/
+                [...]
+            sheet_music/
+                [...]
+        controllers/
+            [...]
+        [...]
+```
+
+```text[5,7,9,11]
+music_universe/
+    app/
+        controllers/
+            [application_controller.rb
+            authentication/
+                sessions_controller.rb
+            billing/
+                [...]
+            lessons/
+                [...]
+            sheet_music/
+                [...]
+        [...]
+```
+</div>
+
+
+Notes:
+And suddenly you go from the monolith you love
+
+---
+####  The monolith you'll hate
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap: 2rem">
+
+```text[13]
+music_universe/
+    app/
+        models/
+            application_record.rb
+            authentication/
+                session.rb
+            billing/
+                [...]
+            lessons/
+                [...]
+            sheet_music/
+                [...]
+            student_app/
+        controllers/
+            [...]
+        [...]
+```
+
+```text[13]
+music_universe/
+    app/
+        controllers/
+            [application_controller.rb
+            authentication/
+                sessions_controller.rb
+            billing/
+                [...]
+            lessons/
+                [...]
+            sheet_music/
+                [...]
+            student_app/
+        [...]
+```
+</div>
+Notes:
+
+To the monolith you hate.
+
+By adding a new namespace that is not quite like the others you sign the agreement to carry a huge debt.
+
+This new module models a new `actor` in your system. But it is a top level module so your only option is to put it alongside your other top level modules. Meaning, now billing or authentication are at the same level of the student_app. It kind of feels wrong.
+
+I have encountered this problem in rails apps many many times and wondered for years if there was a way to make the codebase speak for itself and show me the boundaries?
+How do you design something that speaks for itself?
+
+---
+
+# Norman doors
+
+Notes:
+(quick design detour)
+---
+
+![A Norman door](images/bad_door.webp) <!-- .element: style="max-height: 70vh" -->
+
+Notes:
+
+PICTURE OF NORMAN DOORS
+
+Have you ever approached a door, and pushed. But it doesn't open. So you push a litttle harder. Doesn't budge. So you look in anguish to see if someone is seeing you struggle and then you pull it, and it opens. You feel like a fool.
+
+I do that. Quite regularly.  Specially with the ones that have a huge sign that says PULL.
+
+It's not your fault. Its the design of the door. 
+
+The problem is the choice of door handles... they tell you to do the opposite of what you should do.
+---
+![Door handles](images/push-pull.jpg) <!-- .element: style="max-height: 70vh" -->
+
+Notes:
+
+A properly designed door will speak for itself and will prompt you to do the most obvious action to open it.
+
+Plate for push. Handle for pull.
+
+
+---
+### The design of the codebase
+
+Notes:
+
+I care deeply about the experience of navigating a code base. The design of the codebase itself.
+
+That's why there's Rails app that I love. A small rails app. An app that is kept in check by the conventions the framework comes with. 
+It makes most things very obvious and it always feels familiar, even if it's the first time you see it.
+
+And I think this is the crux of the age old meme: Rails doesn't scale
+
+It's no longer about scaling resources. We can put our code in servers with more processing power and put them in multiple servers at a time to balance load. We can even have multiple databases and shard them, we have beautiful and conventional caching mechanisms...
+
+So I guess the problem then comes from the volume of code in our apps and how that becomes a problem to scale... not just your domains but our teams aroud it. The beauty, speed and conventions of rails start working against us. 
+
+
+---
+#### The architecture spectrum
+
+![spectrum 1](images/spectrum/1.svg)
+
+Notes: 
+
+The only advice out there seems to be: extract your code into microservices and get rid of the monolith
+
+But the jump in complexity is astronomical.
+
+So I wondered, 
+
+how can I turn `the rails monolith I hate` into many small rails apps that I love
+but keeping it simple?
+
+---
+
+#### Searching for an answer
+
+---
+```text
+teacher_app
+    controllers
+    models
+    views
+    tests
+student_app
+    controllers
+    models
+    views
+    tests
+```
+
+Notes:
+I put on my designer hat and came up with this.
+Could we have something that resembles Two or more separate apps within the same monolith?
+
+Each "app" with its own models and views and controllers and tests
+
+---
+```text [1|,2,7|3,4,5,6,8,9,10]
+teacher_app
+    billing
+        models
+        controllers
+        jobs
+        tests
+    profile
+        models
+        controlers
+        tests
+    
+student_app
+    controllers
+    models
+    views
+    tests
+```
+
+
+Notes:
+Or pushing it further...even something like this, where a single app is composed of many different areas, 
+
+(slide)
+
+(slide 2)
+
+each with its own models, controllers, jobs, tests etc.
+
+How would you go about doing something like this in Rails when we just have the app folder?
+
+here's what I had seen so far.
+
+
+---
+##### Just use the app folder
+```text[|2|3,4,6]
+app/
+  features/
+    teacher_app/
+      models/
+        lesson.rb
+      controllers/
+        lessons_controller.rb
+```
+
+Notes:
+You can have any structure in the app folder. 
+
+(slide)
+
+Let's say you add a features folder under app
+
+(slide)
+
+If within that folder you create directories for models and controllers
+
+
+(slide)
+---
+##### Just use the app folder
+
+```ruby [2,10]
+class TeacherApp
+  module Models
+    class Lesson < ApplicationRecord
+      self.table_name = "teacher_app_lessons"
+    end
+  end
+end
+
+class TeacherApp
+  module Controllers
+   class LessonsController < ApplicationController
+    # ...
+    end
+  end
+end
+```
+
+Notes:
+Your classes will have modules for MODELS AND CONTROLLERS
+
+and you'll have to override the table's name
+
+Sure, you can tell zeitwerk to collapse the models folder but then the folder structure becomes unconventional.
+
+---
+##### Just use the app folder
+
+```
+app/
+  features/ <- No namespace
+    payments/
+      transacion.rb               <- model
+      transactions_controller.rb  <- controller
+      settlement_job.rb           <- job
+    billing
+      [...]
+```
+
+```ruby
+Payments::Transaction
+Payments::TransactionController
+Payments::SettlementJob
+Payments::ReverseTransactionService
+```
+
+Notes:
+Here's another option
+
+If you decided to ditch Rails' conventions of having folders for models/controllers//jobs you can actually make your own structure as you please and it will work... as you respect Zeitwerk's loading conventions.
+
+Views though, not so much. Those would still have to be in the traditional views folder unless you explicitly told rails to look for views elsewhere.
+
+What I don't like about these approaches is that the app no longer feels like a ruby on rails codebase. 
+
+Sure, you can get used to it but there is a lot of power in the tribal knowledge of  what a rails app structure looks like
+
+---
+
+#### What about Rails engines?
+
+Notes:
+
+Shopify has been saying for a long time that Engines are the answer so I figured I'd try
+
+So I went to the rails guides, purchased a few books, read every article possible and embarked in the journey of creating my dream app structure using engines. Here's how it went:
+
+---
+
+```
+rails plugin new blorgh --mountable
+```
+
+Notes:
+In a completely fresh rails installation I ran this command from the rails guide to engines.
+I figured out very quickly it would also add a separate git repository which now lives inside my rails application
+
+---
+```
+rails plugin new blorgh --mountable \
+                        --skip-git
+```
+
+Notes:
+So I discarded my changes and ran the generator again with the option to skip git.
+---
+
+```text
+app/
+    assets/
+    models/
+    ...
+config/
+blorgh/
+    app/
+        assets/
+        models/
+        controllers/
+        jobs/
+        ...
+```
+
+
+Notes:
+Cool, this kind of resembled what I wanted. I proceded to make a small commit and....
+
+---
+![engine generator](images/engine_generator.png)
+Notes:
+lo and behold.. 80 files are created! Where does this all come from?
+
+---
+
+```text[|14|19|20,21,23|18|6,7]
+app/
+  assets/
+  models/
+  ...
+blorgh
+  Gemspec
+  Gemfile
+  app/
+    assets/
+    models/
+    ...
+  config/
+    ...
+  test
+    controllers/
+    models/
+    ...
+    test_helper.rb
+    dummy/
+      app/
+        controllers/
+          [...]
+        models/
+          ...
+        config/
+        rakefile
+        storage/
+        tmp
+        log
+        lib/
+                
+```
+
+Notes:
+
+Well, the generator assumes you want to publish your engine and that it is going to be completely generic so any Rails application in the entire world could use it, 
+
+(slide)
+
+so logically, you have to test it so the generator provides you with a `dummy` rails application 
+
+(slide)
+
+which is in fact a complete Rails application with its own 
+
+(slide)
+
+models and controllers that...
+
+will help you mimic those possible millions of applications it might end up installed in.
+
+
+(slide)
+In order to test it, it needs its own `test_helper.rb` to tells the engine that it will be tested agains this dummy application.
+
+
+(slide)
+If it's meant to be installed, it needs a `Gemspec` and a `Gemfile` of its own.
+
+---
+
+
+```text
+bin/rails blorgh:install:migrations
+```
+
+Notes:
+And most engines have active record models that need access to the database to create tables. So they have their own migrations that you need to install onto your rails app. this command then copies migrations from the engine to the main app so the are kind of duplicated in a sense.
+
+---
+
+# 🥵
+
+Notes:
+
+DRINK WATER HERE
+
+---
+
+#### They are amazing
+But not what I'm looking for
+
+Notes:
+
+Don't get me wrong though: They are absolutely amazing and have helped the community build great tools many of us use.
+
+But it's not what I was looking for. It's waaaay too complex if what I'm looking for is just to organise my app. In Rails we're all about conceptual compression and this feels like the opposite.
+
+---
+#### The architecture spectrum
+
+![spectrum 2](images/spectrum/2.svg)
+
+Notes:
+I would say these engines are much closer to microservices. They're just not deployed in a different server but the experience is almost as if they were.
+
+
+I'm looking for something closer to the left. Something that still feels small and familiar but that gives me a bit more control over the growth of my apps.
+
+---
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap: 2rem">
+  <figure>
+    <img src="images/shopify_decomposing.png">
+    <figcaption>
+      Kirsten Westeinde
+      </br>
+      Shopify Engineering 2019
+    </figcaption>
+  </figure>
+  <figure>
+    <img src="images/shopify_use_engines.png">
+    <figcaption>
+      Philip Müller
+      </br>
+      Shopify Engineering 2020
+    </figcaption>
+  </figure>
+</div>
+
+Notes:
+
+In my research I kept coming back to Shopify's articles on decomposing the monolith and they said, and I quote:
+
+> While we started out with a lot of custom code, our components evolved to look more and more like Rails Engines. We’re doubling down on engines going forward. They are the one modularity mechanism that comes with Rails out of the box. They have the familiar looks and features of Rails applications, but other than apps, we can run multiple engines in the same process. And should we make the decision to extract a component from the monolith, an engine is easily transformed into a standalone application.
+
+---
+
+#### The architecture spectrum
+
+![spectrum 3](images/spectrum/3.svg)
+
+Notes:
+They were talking about this gap. That engines can still be used to fill this gap.
+
+What did they know about using engines that no one else did?
+
+Were they maintaining 80+ files per domain slice? And becoming experts at managing this added complexity? 
+
+Surely not
+
+---
+# 👀
+
+Notes:
+So I did what any motivated engineer would do. I started stalking people. 
+
+I followed everyone. EVERYWHERE. every social media app
+
+Until the final clue came my way via a notification on github. 
+
+---
+![Rafaels repository](images/rafael_lego.png)
+
+Notes:
+
+Rafael, fromt he rails core team, published a 1 commit repository called Lego. 
+
+The commit message reads:
+
+> Prepare a componentized application
+
+
+---
+```text
+README.md
+This component was genereted with 
+bin/rails plugin new components/platform --mountable 
+but removing a few files [...]
+```
+
+Notes:
+And the readme says it's created using the engines generator but removing a few files.
+
+---
+##### Finding the leanest engine
+
+Notes:
+So I started removing files on an engine of my own
+
+---
+```text
+Gemfile
+bin/
+```
+
+
+Notes:
+So I did it, I ran the generator again and started removing stuff following Rafael's Readme. 
+
+It worked. But I wanted to keep going. How much more stuff can I remove?
+---
+
+```text
+Gemspec
+db/
+test/ # specially the dummy rails app!
+app/
+config/
+```
+
+Notes:
+So I removed 
+(read list)
+
+---
+# 🙃
+#### It didn't work
+Notes:
+
+And, it didn't work. I was missing something critical. A traditional engine is loaded as any gem would be. In your gemfile. But if you remove the gemspec, how's rails supposed to know how to load your code?
+
+I was stuck. 
+
+If I wanted to create, not just the smallest engine, but the most approachable, the one that felt like code created by myself, code that I  owned and completely undrstood, I had to come up with a way to load it.
+
+---
+# 🤿
+Notes:
+
+So I dove in into  the codebase of for engines and I found a comment that is not on the rails guide but was the key to answer all my questions and unlock the 
+leanest 
+possible 
+engine. 
+
+I'm going to read it to you with a few edits of my own:
+---
+> `Rails::Engine` allows you to wrap a ~~specific [`Rails`](https://api.rubyonrails.org/classes/Rails/Rails.html) application or~~ subset of functionality ~~and share it with other applications or~~ within a larger packaged application. Every [`Rails::Application`](https://api.rubyonrails.org/classes/Rails/Application.html) is just an engine, which allows for simple feature and application sharing.
+---
+
+> ~~If you want a gem to behave as an engine, you have to~~ specify an Engine ~~for it~~ somewhere inside your ~~plugin's~~ lib folder ~~(similar to how we specify a Railtie)~~
+
+```ruby
+# lib/my_engine.rb
+module MyEngine     
+    class Engine < Rails::Engine     
+    end
+end
+```
+
+---
+#### 🎉🎉🎉
+> Then ensure that this file is loaded at the top of your  config/application.rb  ~~(or in your Gemfile),~~ and it will..
+---
+# 🥁
+---
+
+# 🔥🔥🔥
+>automatically load models, controllers, and helpers inside app, load routes at  config/routes.rb , load locales at  config/locales/\*/ , and load tasks at  lib/tasks/\*/ .
+
+---
+An Engine can be just a code loading assistant
+
+Notes:
+
+Seen like this, an Engine can be so much simpler. The conceptual compression was already there.  It's just that the generator was built for a different purpose. The generator, not the abstraction.
+
+Engines can act as a simple code loader to extend your application. One that knows about the conventions set by Rails and Zeitwerk to load your code.
+
+
+So, what does the leanest and smallest engine look like? Let's try it
+
+---
+#### The leanest engine
+
+```text[|7]
+music_universe
+    app/
+    bin/
+    config/
+    db/
+    [...]
+    packages
+```
+
+Notes:
+
+Before we start, we'll create a folder at the root of a rails app where all of our engines will live. Call it engines, packages, components... whatever you feel conveys the message better. 
+
+(slide)
+
+I'll stick to packages and you'll know why later in the talk.
+
+---
+1. Create a folder for your engine.
+
+```text[4]
+app/
+[...]
+packages/
+    billing/
+```
+
+Notes:
+
+Now, creating an engine requires following a few simple conventions:
+
+#### 1. Create a folder for your engine.  It can have any name you want. I'll call it `billing`. 
+
+---
+#### 2. Create lib and app
+```text[5,6]
+app/
+[...]
+packages/
+    billing/
+        app/
+        lib/
+```
+Notes:
+2.Inside it Create a lib folder and an app folder
+
+---
+#### 3. Create the engine class
+
+```text[3]
+app/
+[...]
+    packages/billing
+      lib/engine.rb
+```
+
+```ruby
+# packages/billing/lib/engine.rb
+module Billing
+    class Engine < Rails::Engine
+        isolate_namespace Billing
+    end
+end
+
+```
+
+Notes:
+
+3. Now, in the lib folder create a file called engine. 
+
+In it, create a class called ENGINE
+
+within the billing namespace and
+
+have it inherit from `Rails::Engine`.
+
+
+---
+#### 4. Require the engine
+
+```ruby[|6]
+# config/application.rb
+require_relative "boot"
+require "rails/all"
+Bundler.require(*Rails.groups)
+
+require_relative "../packages/billing/lib/engine.rb"
+
+```
+
+Notes:
+
+4. Now, to let the rails application know about this engine, we'll require it 
+
+(slide)
+
+just as the docs for engines said.
+
+---
+
+```text[4,7,9]
+app
+config
+db
+packages/billing/
+    app/
+        models/
+            billing/bill.rb
+        jobs/
+            billing/create_daily_invoice_reminders_job.rb
+```
+
+Note:
+
+that's it. Now you can add anything within the app folder just as you would in a conventional Rails application.
+
+---
+```text
+rails c
+```
+
+```text[2,5,8]
+irb(main):001:0> Billing
+=> Billing # The module defined in engine.rb
+
+irb(main):003:0> Billing::Bill
+=> Billing::Bill # The model defined at models/billing/bill.rb
+```
+
+Notes:
+
+If you fire up a rails console and try it..
+
+%%
+---
+# 🍪
+
+Notes:
+
+I don't know about you, but I'm starting to smell fresh cookies again.
+
+I was so so so excited when I found this. I remembered all the codebases I had worked on before that would have benefitted from this very simple technique.
+
+---
+
+#### The architecture spectrum
+
+![spectrum 3](images/spectrum/3.svg)
+
+Notes:
+We have finally found a way to go from this
+
+---
+
+#### The architecture spectrum
+
+![spectrum 4](images/spectrum/4.svg)
+
+Notes:
+To this. The smallest step possible from a traditional rails app but with a huge gain.
+
+---
+##### Examples
+
+Notes:
+So, what sorts of things can you do with this?
+
+Let's see a few examples of what you could do now that you know this technique.
+
+%%
+
+---
+Music Universe App
+
+
+```
+rails new music_universe --asset-pipeline=propshaft
+```
+
+Notes:
+
+Let's create a new app called music_universe for music teachers and sutdents. 
+
+Before I continue, let's agree on what's about to happen. Your Rails app continues to work almost exactly as any rails app you've worked with before. It's still ONE rails application. Split up, yes. But essentially a single rails app. 
+That means a single applicaton.rb file,  a single config/database.yml, the same 3 basic environments we get from a vanilla rails installation (production, development and test) and a single database.
+
+---
+🗑 Dump the app folder 😱
+
+```text[2]
+music_universe
+    --- no app folder! ----
+    bin/
+    config/
+    db/
+    lib/
+    log/
+    public/
+    storage/
+    test/
+    tmp/
+    vendor/
+    Gemfile
+    gemfile.lock
+    [etc...]
+```
+
+Notes:
+
+With that out of the way
+
+we'll completely delete the app folder. 
+
+
+Weird right?
+
+The app folder in a traditional rails app is what holds our domain code, not our configuration code. Our domain code will now be split up in different packages so we really don't need a single app folder for it because we'll have multiple; one in each engine.
+
+---
+#### Planning the structure
+
+```text[4|5|6]
+music_universe
+    [...]
+    packages
+        teacher_app
+        student_app
+        admin
+    
+```
+Notes:
+Now let's plan how we'd like our structure to be
+- teacher app
+- student app
+- admin app
+
+---
+
+```text[4,7,10,13]
+music_universe/
+    [...]
+    config/
+        application.rb # Remember to require engines here
+    packages/
+        teacher_app/
+            lib/engine.rb
+            app/[...]
+        student_app
+            lib/engine.rb
+            app/[...]
+        admin
+            lib/engine.rb
+            app/[...]
+```
+
+
+Notes:
+We then follow the steps we just went thorugh to create three engines and require them int he config/application.rb as we saw previously.
+
+---
+
+```text[3,6,7,8,9,10|3,11,12,13,14,15|16,17|18,19]
+music_universe/
+    packages/
+        teacher_app/
+            lib/engine.rb
+            app/
+                models/teacher_app/
+                    teacher.rb
+                    student.rb
+                    lesson.rb
+                    assignment.rb
+                controllers/teacher_app/
+                    lessons_controller.rb
+                    students_controller.rb
+                    student/
+                        assignments_controller.rb
+                views/
+                    [...]
+            test/
+                factories/
+                [...]
+    
+```
+
+Notes:
+
+Now each app can have its own 
+models
+
+controllers 
+
+(slide)
+views 
+
+(slide)
+
+tests/factories. 
+
+---
+
+```text[4,7,10,13]
+music_universe/
+    packages/teacher_app/app/models/
+        teacher_app/
+            student_management
+                student.rb
+                [...]
+            billing
+                bill.rb
+                [...]
+            sheet_editing
+                sheet.rb
+                [...]
+            schedulling
+                [...]
+                        
+```
+
+Notes:
+
+But what happens when, for example, the teacher apps gets way to big and you find that it has a few concrete areas you could extract?
+
+---
+
+#### 🤯 Nesting engines
+
+```text[4,8,11,14|7]
+music_universe/
+  config/application.rb # Remember to require your engines here.
+  packages/
+    teacher_app/
+      app/
+      [...]
+      features/ # I'm calling this folder features instead of packages
+        student_management
+          app/
+            [models/controllers/views/jobs/test etc]
+          billing
+            app/
+              [models/controllers/views/jobs/test etc]
+          sheet_editing
+            app/
+              [models/controllers/views/jobs/test etc]
+```
+```ruby
+TeacherApp::StudentManagement
+TeacherApp::Billing
+TeacherApp::SheetEditing
+```
+
+Notes:
+You can actually have engines withing engines if you want.
+
+(slide)
+In this case I'm using the word featrues as the folder that encapsulates these areas because in the context of the app, well, they are features.
+
+---
+
+## 😒 
+#### So many nested folders
+
+Notes:
+
+When I pitched this to a few friends they didn't like it because of the amount of folders this created. Not just the nested engines but the regular ones as well.
+
+For a moment there I got discouraged because I though... 
+
+> Yeah I mean, why so many folders? 
+
+
+---
+
+<div class="r-stack">
+<img src="images/editor_settings/before.png">
+<img src="images/editor_settings/after.png" class="fragment">
+</div>
+
+
+#### 
+
+Notes:
+I do see the problem though, 
+
+but I then realised I was trading a good architectural mechanism for an UX concern.
+
+And UX I can fix
+
+so I actually found a solution for it
+
+In a few IDEs and code editors you can create 
+- custom views or workspaces
+- and turn on settings to compact folders so they take less space up
+
+You'll go from this...
+
+(slide)
+
+to this
+
+---
+
+#### This is not financial advice
+
+Notes:
+
+I'm not saying this is the absolute best way to start an app... 
+
+knowing which parts of your app to extract into a separate unit is a hard problem and one that you and only you will know how to solve when you have enough domain knowledge so do take it with a grain of salt.
+
+But knowing that it's possible and that you don't need any new tools or gems to do it is just fascinating.
+
+---
+##### Extras
+Notes:
+
+Ok so we've covered how to create the leanest engine and put a few classes in but there are so many little details when it comes to really using this day to day. I'll brush over them to give you some assurance that it works but I won't have time to go into depth into everything.
+
+---
+
+##### Models and migrations
+
+```text
+bin/rails generate model teacher name last_name
+```
+Notes:
+
+I mentioned before that we wouldn't use migrations for engines in the traditional engine sense. That is, lettting the engine manage the migrations and then installing them into the parent app. 
+
+Remember, we're treating this app as if it were a normal rails app, just with a different structure for our domain's code. 
+
+Instead of using the normal model generator...
+---
+<!-- h1: class="with-gradient" -->
+##### Models and migrations 
+
+```text[8]
+music_universe/
+  [...]
+  config/
+    application.rb # Remember to require engines here
+  packages/
+    teacher_app/lib/engine.rb
+      app/models/teacher_app/
+        teacher.rb
+```
+
+```ruby
+module TeacherApp
+    class Teacher < ApplicationRecord
+    end
+end
+```
+
+Notes:
+
+First we'll create the model file. This will give us the name for the table we want
+
+`teacher_app_teachers`
+
+---
+#### Models and migrations
+
+```
+bin/rails generate migration create_teacher_app_teachers name last_name
+```
+
+Notes:
+
+Then, we'll create a migration in the regular db folder which is exactly what we want. 
+
+Remember, we're just splitting up our domain code. Not the core stuff like databases or configurations. 
+
+%%
+
+---
+##### A wild `ApplicationRecord` appears!
+
+```ruby
+module TeacherApp
+    class Teacher < ApplicationRecord
+    end
+end
+```
+
+Notes:
+Those with a keen eye will have noticed that the teacher class inherits from `ApplicationRecord` but we deleted the app folder where that class lived.
+
+And some of you might say this won't work. And you'lll be right. We need that class.
+
+I deleted the app folder for the ultimate dramatic effect but we do need a place to define all of these core classes. So, let's create an engine for them
+
+---
+
+```text[5|5,6,7,8,9,10,11,12,13,14]
+music_universe/
+    [...]
+    config/application.rb # Remember to require engines here
+    packages/
+        core/lib/engine.rb
+            app/
+                models/
+                    application_record.rb
+                controllers/
+                    application_controller.rb
+                mailers/
+                    application_mailer.rb
+                jobs/
+                    application_job.rb
+                
+```
+
+```ruby
+# music_universe/packages/core/lib/engine.rb
+module Core
+    class Engine < Rails::Engine
+    end
+end
+
+```
+
+Notes:
+
+We'll create a package named core just like we did with the others and fill it up with all the core classes we need. ApplicationRecord, ApplicationController etc.
+
+There's something a little off here in this app strucutre compared to the other ones.
+Do you notice it?
+
+I'm naming this "core" but I'm not using the "core" namespace to nest my classes within models/controllers etc.
+
+Remember, that zeitwerk will load all the code under `app` so, in any engine, you could define classes at the top level. It's a sharp knife. But we love sharp knifes in Rails.
+
+That's why we can have an engine to organise our core classes but not have `core` become a namespace in our app. We don't really need it.
+
+---
+
+
+```
+bin/rails db:migrate
+```
+
+Notes:
+With that out of the way we can run rails db:migrate and everything will work like a charm.
+
+
+---
+
+#### Testing
+
+```text
+music_universe/
+    config/application.rb
+    packages/
+        teacher_app/
+            app/models/teacher_app/
+                teacher.rb
+            test/models/teacher_app/
+                teacher_test.rb
+```
+
+```ruby
+require "test_helper"
+
+module TeacherApp
+    class TeacherTest < ActiveSupport::TestCase
+        test "the truth" do 
+            assert true
+        end
+    end
+end
+```
+Notes:
+
+For me, one of the biggest benefits of splitting apps this way is that tests will live alongside the code they use.  
+
+And the test helper we'll use in every engine is the same we would use in any rails app.
+
+%%
+
+---
+#### Testing
+
+```text
+bin/rails test packages/ # <- keep the trailing slash
+```
+
+Notes:
+
+To run tests fo rall packages run bin/rails test packages/  with the trailing slash
+
+
+---
+#### Testing
+
+```text
+bin/rails test packages/teacher_app
+```
+
+
+Notes:
+Or run tests for a single package like so.
+
+You can even have factories per package  if you use something like Factory Bot.
+
+---
+
+#### Routing
+
+```text[3|10]
+music_universe/
+  config
+    routes.rb
+  [...]
+  packages/
+    teacher_app/
+      lib/
+      app/
+      config/
+        routes.rb
+```
+
+Notes:
+
+If your engine has controllers it will have to manage routes and the good news is, routes work like they always have.
+
+You'll have the regular routes at config/routes.rb
+
+And the engine will also have its own routes.
+
+---
+#### Routing
+
+```ruby
+# music_universe/packages/teacher_app/config/routes.rb
+TeacherApp::Engine.routes.draw do 
+  root to: "home#home"
+end
+```
+
+Notes:
+
+You'll have to configure your engine's routes
+
+and then...
+
+(slide)
+---
+#### Routing
+
+
+```ruby
+# config/routes.rb
+
+Rails.application.routes.draw do 
+  mount TeacherApp::Engine, at: "/teacher_app"
+end
+
+```
+Notes:
+
+Mount the engine in the application's routes.
+
+
+---
+
+##### Routing
+
+```ruby
+# config/routes.rb
+
+Rails.application.routes.draw do 
+  # teacher.music_universe.io 
+  constraints subdomain: "teacher" do 
+    mount TeacherApp::Engine, at: "/"
+  end
+    
+end
+```
+
+Notes:
+
+You use constraints here and serve each engine off a diferent subdomain.
+Or maybe even a different IP altogether. I haven't tried this but I even think this would allow you to have different servers or server clusters per engine. Talk to your local devops expert to figure it out.
+
+---
+#### Static Sites
+<small>For a marketing site or a blog</small>
+
+![sitepress](images/sitepress.png)
+
+Notes:
+
+You can even use sitepress, a static site generator from within an engine
+so you can build your marketing site and even a blog from the same codebase
+
+Should you? Why not? At least to start!
+
+---
+
+#### And all other powers of engines
+
+- Configurations
+- Initializers
+- Assets (paths are preconfigured)
+- And much more
+
+---
+
+#### This structure tells a story
+
+Notes:
+
+I want to make a pause here
+
+Some of you might think... well, there's really not much difference between this and the traditional app folder with modules namespacing classes.
+
+And you're kind of right. Technically it's no different. You can do the exact same thing with just modules
+
+But the story this structure tells is different. We have put plates to push and handles to pull.
+
+What I mean by that is that...
+
+having this separation will signal that classes have a concrete home, completely separated from other homes within your app. It conveys that they are meant to be used in a particular way. 
+
+These new homes will naturally expanded within its bounds and will seek protection from external forces.
+
+With very little friction, you can start thinking of your app as a collection of very simple pieces.
+
+---
+
+![Rich Hickey](images/rich_hickey.png)
+Notes:
+
+I recently rewatched the 2012 talk by Rich Hickey, Simplicity Matters where he talks about developing sensibilities around entanglement in order to create simple code. 
+He calls simplicity the primary source of true agility because it enables change.
+
+Rich says
+
+We can chose to solve problems in simple or complex ways. 
+
+Simple meaning one fold or one braid. Like a single piece of thread.
+
+vs complex which means to weave or braid many things together. 
+
+Imagine that drawer you have at home full of tangled cables where you can't pull just one because you end up pulling them all like a huge hairball
+
+So in the context of this talk, what does simple and complex mean?
+---
+<!-- .slide: data-auto-animate -->
+
+<img src="images/packwerk/lonely_pack.png" 
+     data-id="single-pack">
+
+Notes:
+We have the tools now to create this. Something that resembles the familiar structure of a Rails app which has a few or a lot of classes which interact with each other.
+
+---
+<!-- .slide: data-auto-animate -->
+<div class="grid grid-rows-2 grid-cols-3 gap-4">
+  <img src="images/packwerk/lonely_pack.png" 
+      data-id="single-pack">
+  <span></span>
+  <img src="images/packwerk/lonely_pack.png" 
+      data-id="single-pack">
+  <span></span>
+  <img src="images/packwerk/lonely_pack.png" 
+      data-id="single-pack">
+  <span></span>
+</div>
+
+Notes:
+And we are now free to create as many as we want.
+
+But they will need to communicate with each other.
+
+---
+
+<div class="r-stack">
+  <img src="images/packwerk/1_many_no_connections.png">
+  <img class="fragment" src="images/packwerk/2_few_connections.png">
+  <img class="fragment" src="images/packwerk/3_hairball.png">
+</div>
+
+Notes:
+(slide)
+
+If we are not careful about keeping that communication in check
+
+(slide)
+you can end up making a mess
+
+(slide)
+
+---
+
+#### Crossing boundaries
+
+```ruby
+# music_universe/packages/core
+#	/app/models/application_record.rb
+ApplicationRecord 
+
+# music_universe/packages/teacher_app
+#	 /app/models/teacher_app/application_record.rb
+class TeacherApp::Teacher < ApplicationRecord
+end
+```
+
+```text
+music_universe/
+    packages/
+        core/app/models/application_record.rb
+        teacher_app/app/models/teacher_app/teacher.rb
+            
+```
+
+
+Notes:
+Some of you might have noticed that we already started making connections when we used the ApplicationRecord class from the Core package in the Teacher Active Record model.
+
+Every active record model will need this class
+
+---
+##### Crossing boundaries
+
+Notes:
+
+I think this is where rails' frictionless process for creating code sometimes works against us. 
+
+It's so fast to create things that we sometimes don't stop and ask about the ownership of classes in complex domains like this one. 
+
+But knowing who the owner is and who is meant to have access to a class is a very important question to create simple systems. Not ones that are braided in complicated ways.
+
+---
+<p>All you need is Rails Engines</p>
+
+<div class="fragment">
+  <p>❤️</p>
+  <h1>Packwerk</h1>
+</div>
+
+Notes:
+
+This talk is called All you need is Rails Engines. Yes. 
+
+But because all the classes, modules and constants of all our engines are autoloaded and available everywhere, it's  hard to guard against the indiscriminate uses of classes all around.
+
+(slide)
+
+That's why engines love packwerk
+---
+
+#### Packwerk
+
+Notes:
+Packwerk, a gem by shopify, helps maintain healthy relationships between different parts of your domain.
+
+It does so by helping you make conscious and intentional decisions on when to take on a new dependency and encourages you to design proper public APIs.
+
+---
+#### Installing Packwerk
+```text[1|3|5]
+bundle add packwerk
+
+bundle binstub packwerk
+
+bin/packerk init
+```
+
+```text
+music_universe/
+  packages/
+  db/
+  config/
+  ...
+  packerk.yml ---> Configuration file
+  package.yml ---> A package for the root folder
+```
+
+Notes:
+
+You'll need to add packwerk to your gemfile
+
+slide
+
+and then create the packwerck binstub
+
+slide
+
+then runing bin/packwer init you'll create the necessary files for packwerk to work.
+
+---
+#### Packages
+```text[|6,10]
+music_universe/
+  packages/
+    teacher_app/
+      app/
+      lib/
+      package.yml
+    student_app/
+      app
+      lib
+      package.yml
+```
+
+Notes:
+Packwerk works by defining packages. This is the reason why I've been using the word package and engine interchangeably in this talk. A package is just a collection of code within a folder. In our case, our engine's folder. 
+
+(slide)
+
+We make every engine in the music_universe app a package by creating a package.yml file in it
+---
+#### Privacy
+
+```ruby [|3-8|10-15]
+class Student
+  
+  # public
+  def onboard
+    enable_lessons_walkthrough
+    notify_parents
+    # ...
+  end
+
+  private
+  def enable_lessons_walkthorugh
+  end
+
+  def notify_parents
+  end
+  
+end
+```
+
+Notes:
+Now that we know how to make our turn our lean engines into ones enhanced by packwerk we can learn about its two main concepts 
+
+First; Pivacy.
+
+I like to think of privacy in packages as privacy in ruby classes. 
+
+(slide)
+
+You define a public interface for your class so other classes can call methods on it, but inside it, 
+
+(slide)
+
+you may have many private methods that are used by the class but are non accessible to the outside world. 
+
+---
+
+#### Privacy
+
+<svg width="700" height="597" viewBox="0 0 1000 853" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="package_animated">
+<path id="public_area" d="M0 93C0 41.6375 41.6375 0 93 0H907C958.362 0 1000 41.6375 1000 93V760C1000 811.362 958.362 853 907 853H93C41.6375 853 0 811.362 0 760V93Z" fill="#F2FCFF"/>
+<path class="fragment" 
+      id="public_boundary"
+      data-fragment-index="4" fill-rule="evenodd" clip-rule="evenodd" d="M80.8533 852.214L82.4055 840.315C85.8676 840.766 89.4035 841 93 841H104.971V853H93C88.8831 853 84.8288 852.732 80.8533 852.214ZM895.029 853V841H907C910.596 841 914.132 840.766 917.595 840.315L919.147 852.214C915.171 852.732 911.117 853 907 853H895.029ZM942.599 845.943L938.003 834.858C944.581 832.13 950.727 828.557 956.305 824.271L963.617 833.786C957.217 838.704 950.16 842.808 942.599 845.943ZM980.786 816.617L971.271 809.305C975.557 803.727 979.13 797.581 981.858 791.003L992.943 795.599C989.808 803.16 985.704 810.217 980.786 816.617ZM1000 104.911H988V93C988 89.4035 987.766 85.8676 987.315 82.4055L999.214 80.8533C999.732 84.8288 1000 88.8832 1000 93V104.911ZM992.943 57.4007L981.858 61.9974C979.13 55.4188 975.557 49.2725 971.271 43.695L980.786 36.3831C985.704 42.7826 989.808 49.8401 992.943 57.4007ZM963.617 19.2138L956.305 28.7289C950.727 24.4428 944.581 20.8696 938.003 18.1416L942.599 7.05689C950.16 10.1922 957.217 14.2961 963.617 19.2138ZM104.971 0H93C88.8831 0 84.8288 0.2675 80.8533 0.786066L82.4055 12.6853C85.8676 12.2337 89.4035 12 93 12H104.971V0ZM57.4007 7.05689L61.9974 18.1416C55.4188 20.8696 49.2725 24.4428 43.695 28.7289L36.3831 19.2139C42.7826 14.2961 49.8401 10.1922 57.4007 7.05689ZM19.2139 36.3831L28.7289 43.695C24.4428 49.2725 20.8696 55.4188 18.1416 61.9974L7.05689 57.4007C10.1922 49.8401 14.2961 42.7826 19.2139 36.3831ZM0 748.089H12V760C12 763.596 12.2337 767.132 12.6853 770.595L0.786063 772.147C0.267499 768.171 0 764.117 0 760V748.089ZM7.05689 795.599L18.1416 791.003C20.8696 797.581 24.4428 803.727 28.7289 809.305L19.2138 816.617C14.2961 810.217 10.1922 803.16 7.05689 795.599ZM57.4007 845.943L61.9974 834.858C55.4188 832.13 49.2725 828.557 43.695 824.271L36.3831 833.786C42.7826 838.704 49.84 842.808 57.4007 845.943ZM0 724.268H12V700.446H0V724.268ZM0 676.625H12V652.804H0V676.625ZM0 628.982H12V605.161H0V628.982ZM0 581.339H12V557.518H0V581.339ZM0 533.696H12V509.875H0V533.696ZM0 486.054H12V462.232H0V486.054ZM0 438.411H12V414.589H0V438.411ZM0 390.768H12V366.946H0V390.768ZM0 343.125H12V319.303H0V343.125ZM0 295.482H12V271.661H0V295.482ZM0 247.839H12V224.018H0V247.839ZM0 200.196H12V176.375H0V200.196ZM0 152.554H12V128.732H0V152.554ZM0 104.911H12V93C12 89.4035 12.2337 85.8676 12.6853 82.4055L0.786063 80.8533C0.267499 84.8288 0 88.8832 0 93V104.911ZM128.912 0V12H152.853V0H128.912ZM176.794 0V12H200.735V0H176.794ZM224.676 0V12H248.618V0H224.676ZM272.559 0V12H296.5V0H272.559ZM320.441 0V12H344.382V0H320.441ZM368.324 0V12H392.265V0H368.324ZM416.206 0V12H440.147V0H416.206ZM464.088 0V12H488.029V0H464.088ZM511.971 0V12H535.912V0H511.971ZM559.853 0V12H583.794V0H559.853ZM607.735 0V12H631.676V0H607.735ZM655.617 0V12H679.559V0H655.617ZM703.5 0V12H727.441V0H703.5ZM751.382 0V12H775.323V0H751.382ZM799.264 0V12H823.206V0H799.264ZM847.147 0V12H871.088V0H847.147ZM895.029 0V12H907C910.596 12 914.132 12.2337 917.595 12.6853L919.147 0.786063C915.171 0.267499 911.117 0 907 0H895.029ZM1000 128.732H988V152.554H1000V128.732ZM1000 176.375H988V200.196H1000V176.375ZM1000 224.018H988V247.839H1000V224.018ZM1000 271.661H988V295.482H1000V271.661ZM1000 319.304H988V343.125H1000V319.304ZM1000 366.946H988V390.768H1000V366.946ZM1000 414.589H988V438.411H1000V414.589ZM1000 462.232H988V486.054H1000V462.232ZM1000 509.875H988V533.696H1000V509.875ZM1000 557.518H988V581.339H1000V557.518ZM1000 605.161H988V628.982H1000V605.161ZM1000 652.804H988V676.625H1000V652.804ZM1000 700.446H988V724.268H1000V700.446ZM1000 748.089H988V760C988 763.596 987.766 767.132 987.315 770.594L999.214 772.147C999.732 768.171 1000 764.117 1000 760V748.089ZM871.088 853V841H847.147V853H871.088ZM823.206 853V841H799.265V853H823.206ZM775.323 853V841H751.382V853H775.323ZM727.441 853V841H703.5V853H727.441ZM679.559 853V841H655.618V853H679.559ZM631.676 853V841H607.735V853H631.676ZM583.794 853V841H559.853V853H583.794ZM535.912 853V841H511.971V853H535.912ZM488.029 853V841H464.088V853H488.029ZM440.147 853V841H416.206V853H440.147ZM392.265 853V841H368.324V853H392.265ZM344.382 853V841H320.441V853H344.382ZM296.5 853V841H272.559V853H296.5ZM248.618 853V841H224.677V853H248.618ZM200.736 853V841H176.794V853H200.736ZM152.853 853V841H128.912V853H152.853Z" fill="#68ACC2"/>
+<path class="fragment" 
+      id="public_title"
+      data-fragment-index="3" d="M90.5479 64.5552C93.318 64.5552 95.4137 65.1815 96.835 66.4341C98.2682 67.6746 98.9849 69.4692 98.9849 71.8179C98.9849 74.1665 98.2682 75.9671 96.835 77.2197C95.4137 78.4723 93.318 79.0986 90.5479 79.0986H87.8379V82.2964H91.7583C92.0474 82.2964 92.2702 82.3506 92.4268 82.459C92.5833 82.5553 92.6978 82.736 92.77 83.001C92.8543 83.266 92.8965 83.6514 92.8965 84.1572C92.8965 84.6631 92.8543 85.0485 92.77 85.3135C92.6978 85.5785 92.5833 85.7591 92.4268 85.8555C92.2702 85.9518 92.0474 86 91.7583 86H80.6655C80.3765 86 80.1536 85.9518 79.9971 85.8555C79.8405 85.7591 79.7201 85.5785 79.6357 85.3135C79.5635 85.0485 79.5273 84.6631 79.5273 84.1572C79.5273 83.6514 79.5635 83.266 79.6357 83.001C79.7201 82.736 79.8405 82.5553 79.9971 82.459C80.1536 82.3506 80.3765 82.2964 80.6655 82.2964H83.3213V68.2588H80.6655C80.3765 68.2588 80.1536 68.2106 79.9971 68.1143C79.8405 68.0179 79.7201 67.8372 79.6357 67.5723C79.5635 67.3073 79.5273 66.9219 79.5273 66.416C79.5273 65.9102 79.5635 65.5247 79.6357 65.2598C79.7201 64.9948 79.8405 64.8141 79.9971 64.7178C80.1536 64.6094 80.3765 64.5552 80.6655 64.5552H90.5479ZM87.8379 75.2144H89.9878C91.4211 75.2144 92.499 74.9373 93.2217 74.3833C93.9564 73.8293 94.3237 72.9741 94.3237 71.8179C94.3237 70.6616 93.9564 69.8125 93.2217 69.2705C92.499 68.7165 91.4211 68.4395 89.9878 68.4395H87.8379V75.2144ZM118.135 69.3066C118.545 69.3066 118.834 69.397 119.002 69.5776C119.183 69.7463 119.273 70.0353 119.273 70.4448V82.2964H120.665C120.954 82.2964 121.176 82.3446 121.333 82.4409C121.49 82.5373 121.604 82.7179 121.676 82.9829C121.761 83.2479 121.803 83.6333 121.803 84.1392C121.803 84.645 121.761 85.0304 121.676 85.2954C121.604 85.5604 121.49 85.7471 121.333 85.8555C121.176 85.9518 120.954 86 120.665 86H116.618C116.208 86 115.913 85.9157 115.732 85.7471C115.564 85.5664 115.479 85.2713 115.479 84.8618V82.2422C113.89 85.0124 111.902 86.3975 109.518 86.3975C108.422 86.3975 107.458 86.1566 106.627 85.6748C105.808 85.193 105.176 84.5125 104.73 83.6333C104.284 82.742 104.062 81.7002 104.062 80.5078V73.0103H102.67C102.381 73.0103 102.159 72.9621 102.002 72.8657C101.845 72.7573 101.725 72.5706 101.641 72.3057C101.568 72.0407 101.532 71.6553 101.532 71.1494C101.532 70.6436 101.568 70.2581 101.641 69.9932C101.725 69.7282 101.845 69.5475 102.002 69.4512C102.159 69.3548 102.381 69.3066 102.67 69.3066H107.44C107.849 69.3066 108.139 69.397 108.307 69.5776C108.488 69.7463 108.578 70.0353 108.578 70.4448V79.4419C108.578 80.3813 108.741 81.092 109.066 81.5737C109.391 82.0555 109.933 82.2964 110.692 82.2964C111.39 82.2964 112.053 82.0073 112.679 81.4292C113.306 80.839 113.805 80.0562 114.179 79.0806C114.564 78.105 114.757 77.0632 114.757 75.9551V73.0103H112.824C112.535 73.0103 112.312 72.9621 112.155 72.8657C111.999 72.7573 111.878 72.5706 111.794 72.3057C111.722 72.0407 111.686 71.6553 111.686 71.1494C111.686 70.6436 111.722 70.2581 111.794 69.9932C111.878 69.7282 111.999 69.5475 112.155 69.4512C112.312 69.3548 112.535 69.3066 112.824 69.3066H118.135ZM129.571 62.2969C129.981 62.2969 130.27 62.3872 130.438 62.5679C130.619 62.7365 130.709 63.0256 130.709 63.4351V71.041C131.324 70.3545 132.034 69.8306 132.841 69.4692C133.648 69.0959 134.521 68.9092 135.461 68.9092C137.039 68.9092 138.418 69.2946 139.598 70.0654C140.778 70.8363 141.682 71.8841 142.308 73.209C142.934 74.5339 143.248 76.0153 143.248 77.6533C143.248 79.2913 142.934 80.7728 142.308 82.0977C141.682 83.4225 140.778 84.4704 139.598 85.2412C138.418 86.012 137.039 86.3975 135.461 86.3975C134.317 86.3975 133.275 86.1325 132.335 85.6025C131.396 85.0605 130.613 84.3078 129.987 83.3442V84.8618C129.987 85.2713 129.896 85.5664 129.716 85.7471C129.547 85.9157 129.258 86 128.849 86H124.802C124.513 86 124.29 85.9518 124.133 85.8555C123.977 85.7471 123.856 85.5604 123.772 85.2954C123.7 85.0304 123.664 84.645 123.664 84.1392C123.664 83.6333 123.7 83.2479 123.772 82.9829C123.856 82.7179 123.977 82.5373 124.133 82.4409C124.29 82.3446 124.513 82.2964 124.802 82.2964H126.193V66.0005H124.44C124.151 66.0005 123.929 65.9523 123.772 65.856C123.615 65.7596 123.495 65.5789 123.411 65.314C123.338 65.049 123.302 64.6636 123.302 64.1577C123.302 63.6519 123.338 63.2664 123.411 63.0015C123.495 62.7365 123.615 62.5558 123.772 62.4595C123.929 62.3511 124.151 62.2969 124.44 62.2969H129.571ZM134.738 73.0103C133.967 73.0103 133.269 73.1909 132.643 73.5522C132.016 73.9136 131.516 74.4495 131.143 75.1602C130.77 75.8587 130.583 76.6898 130.583 77.6533C130.583 78.6169 130.77 79.4539 131.143 80.1646C131.516 80.8631 132.016 81.3931 132.643 81.7544C133.269 82.1157 133.967 82.2964 134.738 82.2964C135.485 82.2964 136.135 82.1097 136.689 81.7363C137.243 81.3509 137.665 80.8089 137.954 80.1104C138.255 79.4118 138.406 78.5928 138.406 77.6533C138.406 76.7139 138.255 75.8949 137.954 75.1963C137.665 74.4977 137.243 73.9618 136.689 73.5884C136.135 73.203 135.485 73.0103 134.738 73.0103ZM157.285 62.2969C157.695 62.2969 157.984 62.3872 158.152 62.5679C158.333 62.7365 158.423 63.0256 158.423 63.4351V82.2964H163.5C163.789 82.2964 164.012 82.3506 164.168 82.459C164.325 82.5553 164.439 82.736 164.512 83.001C164.596 83.266 164.638 83.6514 164.638 84.1572C164.638 84.6631 164.596 85.0485 164.512 85.3135C164.439 85.5785 164.325 85.7591 164.168 85.8555C164.012 85.9518 163.789 86 163.5 86H148.975C148.686 86 148.463 85.9518 148.306 85.8555C148.15 85.7591 148.029 85.5785 147.945 85.3135C147.873 85.0485 147.836 84.6631 147.836 84.1572C147.836 83.6514 147.873 83.266 147.945 83.001C148.029 82.736 148.15 82.5553 148.306 82.459C148.463 82.3506 148.686 82.2964 148.975 82.2964H153.907V66.0005H149.697C149.408 66.0005 149.185 65.9523 149.029 65.856C148.872 65.7596 148.752 65.5789 148.667 65.314C148.595 65.049 148.559 64.6636 148.559 64.1577C148.559 63.6519 148.595 63.2664 148.667 63.0015C148.752 62.7365 148.872 62.5558 149.029 62.4595C149.185 62.3511 149.408 62.2969 149.697 62.2969H157.285ZM179.651 69.3066C180.061 69.3066 180.35 69.397 180.519 69.5776C180.699 69.7463 180.79 70.0353 180.79 70.4448V82.2964H185.866C186.155 82.2964 186.378 82.3506 186.535 82.459C186.691 82.5553 186.806 82.736 186.878 83.001C186.962 83.266 187.004 83.6514 187.004 84.1572C187.004 84.6631 186.962 85.0485 186.878 85.3135C186.806 85.5785 186.691 85.7591 186.535 85.8555C186.378 85.9518 186.155 86 185.866 86H171.341C171.052 86 170.829 85.9518 170.672 85.8555C170.516 85.7591 170.395 85.5785 170.311 85.3135C170.239 85.0485 170.203 84.6631 170.203 84.1572C170.203 83.6514 170.239 83.266 170.311 83.001C170.395 82.736 170.516 82.5553 170.672 82.459C170.829 82.3506 171.052 82.2964 171.341 82.2964H176.273V73.0103H172.425C172.136 73.0103 171.913 72.9621 171.756 72.8657C171.6 72.7694 171.479 72.5887 171.395 72.3237C171.323 72.0588 171.287 71.6733 171.287 71.1675C171.287 70.6616 171.323 70.2762 171.395 70.0112C171.479 69.7463 171.6 69.5656 171.756 69.4692C171.913 69.3608 172.136 69.3066 172.425 69.3066H179.651ZM178.477 61.3755C179.332 61.3755 179.928 61.4658 180.266 61.6465C180.615 61.8151 180.79 62.1042 180.79 62.5137V65.4766C180.79 65.8861 180.627 66.1812 180.302 66.3618C179.989 66.5304 179.41 66.6147 178.567 66.6147C177.724 66.6147 177.128 66.5304 176.779 66.3618C176.442 66.1812 176.273 65.8861 176.273 65.4766V62.5137C176.273 62.0921 176.43 61.797 176.743 61.6284C177.056 61.4598 177.634 61.3755 178.477 61.3755ZM206.625 68.9092C207.371 68.9092 207.883 68.9935 208.16 69.1621C208.437 69.3307 208.576 69.6258 208.576 70.0474V75.8467C208.576 76.2562 208.389 76.5513 208.016 76.7319C207.654 76.9006 207.046 76.9849 206.191 76.9849C205.625 76.9849 205.185 76.9487 204.872 76.8765C204.571 76.7922 204.36 76.6717 204.24 76.5151C204.119 76.3586 204.059 76.1357 204.059 75.8467C204.059 75.3408 203.933 74.8711 203.68 74.4375C203.439 74.0039 203.071 73.6606 202.578 73.4077C202.096 73.1427 201.512 73.0103 200.825 73.0103C199.958 73.0103 199.199 73.203 198.549 73.5884C197.898 73.9618 197.393 74.5037 197.031 75.2144C196.682 75.9129 196.507 76.7259 196.507 77.6533C196.507 78.5807 196.682 79.3997 197.031 80.1104C197.393 80.8089 197.898 81.3509 198.549 81.7363C199.199 82.1097 199.958 82.2964 200.825 82.2964C201.753 82.2964 202.698 82.1458 203.662 81.8447C204.637 81.5436 205.583 81.1281 206.498 80.5981C206.715 80.4777 206.914 80.4175 207.094 80.4175C207.636 80.4175 208.112 80.8932 208.521 81.8447C208.738 82.3626 208.847 82.8022 208.847 83.1636C208.847 83.7056 208.588 84.1211 208.07 84.4102C206.95 85.0365 205.769 85.5243 204.529 85.8735C203.3 86.2228 202.066 86.3975 200.825 86.3975C198.994 86.3975 197.387 86.0241 196.001 85.2773C194.616 84.5306 193.544 83.4948 192.786 82.1699C192.039 80.8451 191.666 79.3395 191.666 77.6533C191.666 75.9671 192.045 74.4616 192.804 73.1367C193.562 71.7998 194.592 70.764 195.893 70.0293C197.206 69.2826 198.669 68.9092 200.283 68.9092C202.234 68.9092 203.613 69.6138 204.42 71.0229V70.0474C204.42 69.6379 204.595 69.3488 204.944 69.1802C205.294 68.9995 205.854 68.9092 206.625 68.9092Z" fill="#391B89" fill-opacity="0.4"/>
+<g id="package">
+<path id="private_area" d="M165 234C165 182.638 206.638 141 258 141H792C843.362 141 885 182.638 885 234V662C885 713.362 843.362 755 792 755H258C206.638 755 165 713.362 165 662V234Z" fill="#F6F2FF"/>
+<path class="fragment"
+      id="private_boundary"
+      data-fragment-index="2" fill-rule="evenodd" clip-rule="evenodd" d="M792 153H258C213.265 153 177 189.265 177 234V662C177 706.735 213.265 743 258 743H792C836.735 743 873 706.735 873 662V234C873 189.265 836.735 153 792 153ZM258 141C206.638 141 165 182.638 165 234V662C165 713.362 206.638 755 258 755H792C843.362 755 885 713.362 885 662V234C885 182.638 843.362 141 792 141H258Z" fill="#391B89"/>
+<g id="Contents">
+<path id="Model" d="M476.865 572.695H481.454L488.21 592.008L494.967 572.695H499.556L490.053 599H486.368L476.865 572.695ZM474.39 572.695H478.96L479.792 591.521V599H474.39V572.695ZM497.46 572.695H502.049V599H496.629V591.521L497.46 572.695ZM505.645 589.425V589.045C505.645 587.612 505.849 586.293 506.259 585.089C506.668 583.872 507.264 582.819 508.047 581.927C508.83 581.036 509.794 580.343 510.938 579.85C512.082 579.344 513.395 579.091 514.876 579.091C516.358 579.091 517.677 579.344 518.833 579.85C519.989 580.343 520.959 581.036 521.742 581.927C522.537 582.819 523.139 583.872 523.548 585.089C523.958 586.293 524.163 587.612 524.163 589.045V589.425C524.163 590.846 523.958 592.165 523.548 593.381C523.139 594.586 522.537 595.64 521.742 596.543C520.959 597.434 519.995 598.127 518.851 598.621C517.707 599.114 516.394 599.361 514.913 599.361C513.431 599.361 512.112 599.114 510.956 598.621C509.812 598.127 508.842 597.434 508.047 596.543C507.264 595.64 506.668 594.586 506.259 593.381C505.849 592.165 505.645 590.846 505.645 589.425ZM510.848 589.045V589.425C510.848 590.244 510.92 591.009 511.064 591.719C511.209 592.43 511.438 593.056 511.751 593.598C512.076 594.128 512.498 594.544 513.016 594.845C513.534 595.146 514.166 595.296 514.913 595.296C515.635 595.296 516.256 595.146 516.773 594.845C517.291 594.544 517.707 594.128 518.02 593.598C518.333 593.056 518.562 592.43 518.707 591.719C518.863 591.009 518.941 590.244 518.941 589.425V589.045C518.941 588.25 518.863 587.504 518.707 586.805C518.562 586.095 518.327 585.468 518.002 584.926C517.689 584.372 517.273 583.939 516.755 583.625C516.237 583.312 515.611 583.156 514.876 583.156C514.142 583.156 513.515 583.312 512.998 583.625C512.492 583.939 512.076 584.372 511.751 584.926C511.438 585.468 511.209 586.095 511.064 586.805C510.92 587.504 510.848 588.25 510.848 589.045ZM538.905 594.736V571.25H544.144V599H539.429L538.905 594.736ZM526.547 589.461V589.082C526.547 587.588 526.716 586.233 527.053 585.017C527.39 583.788 527.884 582.734 528.535 581.855C529.185 580.976 529.986 580.295 530.938 579.813C531.889 579.332 532.973 579.091 534.189 579.091C535.334 579.091 536.333 579.332 537.188 579.813C538.056 580.295 538.79 580.982 539.393 581.873C540.007 582.752 540.501 583.794 540.874 584.999C541.247 586.191 541.518 587.498 541.687 588.919V589.75C541.518 591.111 541.247 592.376 540.874 593.544C540.501 594.712 540.007 595.736 539.393 596.615C538.79 597.482 538.056 598.157 537.188 598.639C536.321 599.12 535.31 599.361 534.153 599.361C532.937 599.361 531.853 599.114 530.901 598.621C529.962 598.127 529.167 597.434 528.517 596.543C527.878 595.652 527.39 594.604 527.053 593.399C526.716 592.195 526.547 590.882 526.547 589.461ZM531.75 589.082V589.461C531.75 590.268 531.811 591.021 531.931 591.719C532.064 592.418 532.274 593.038 532.563 593.58C532.865 594.11 533.25 594.526 533.72 594.827C534.201 595.116 534.786 595.26 535.472 595.26C536.363 595.26 537.098 595.062 537.676 594.664C538.254 594.255 538.694 593.694 538.995 592.984C539.308 592.273 539.489 591.454 539.537 590.527V588.16C539.501 587.401 539.393 586.721 539.212 586.119C539.043 585.504 538.79 584.98 538.453 584.547C538.128 584.113 537.718 583.776 537.225 583.535C536.743 583.294 536.171 583.174 535.508 583.174C534.834 583.174 534.256 583.33 533.774 583.644C533.292 583.945 532.901 584.36 532.6 584.89C532.311 585.42 532.094 586.046 531.949 586.769C531.817 587.48 531.75 588.25 531.75 589.082ZM557.206 599.361C555.688 599.361 554.327 599.12 553.123 598.639C551.919 598.145 550.895 597.464 550.052 596.597C549.221 595.73 548.582 594.724 548.137 593.58C547.691 592.424 547.468 591.195 547.468 589.895V589.172C547.468 587.69 547.679 586.335 548.101 585.107C548.522 583.878 549.124 582.812 549.907 581.909C550.702 581.006 551.666 580.313 552.798 579.832C553.93 579.338 555.207 579.091 556.628 579.091C558.013 579.091 559.242 579.32 560.313 579.777C561.385 580.235 562.283 580.885 563.005 581.729C563.74 582.572 564.294 583.583 564.667 584.764C565.041 585.932 565.228 587.233 565.228 588.666V590.834H549.69V587.365H560.115V586.968C560.115 586.245 559.982 585.601 559.717 585.035C559.464 584.457 559.079 583.999 558.561 583.662C558.043 583.324 557.381 583.156 556.574 583.156C555.887 583.156 555.297 583.306 554.803 583.607C554.309 583.909 553.906 584.33 553.593 584.872C553.292 585.414 553.063 586.052 552.906 586.787C552.762 587.51 552.689 588.305 552.689 589.172V589.895C552.689 590.677 552.798 591.4 553.015 592.062C553.243 592.725 553.563 593.297 553.972 593.779C554.394 594.261 554.9 594.634 555.49 594.899C556.092 595.164 556.772 595.296 557.531 595.296C558.471 595.296 559.344 595.116 560.151 594.754C560.97 594.381 561.674 593.821 562.265 593.074L564.794 595.82C564.384 596.41 563.824 596.977 563.114 597.519C562.415 598.061 561.572 598.506 560.584 598.855C559.597 599.193 558.471 599.361 557.206 599.361ZM573.683 571.25V599H568.461V571.25H573.683Z" fill="#FB00E2"/>
+<path id="Controller" d="M227.907 360.274H233.309C233.2 362.044 232.712 363.616 231.845 364.989C230.99 366.362 229.792 367.434 228.25 368.205C226.72 368.976 224.878 369.361 222.722 369.361C221.035 369.361 219.524 369.072 218.187 368.494C216.85 367.904 215.706 367.061 214.754 365.965C213.815 364.869 213.098 363.544 212.604 361.99C212.111 360.437 211.864 358.696 211.864 356.769V354.944C211.864 353.017 212.117 351.277 212.623 349.723C213.14 348.157 213.875 346.826 214.827 345.73C215.79 344.634 216.94 343.791 218.277 343.201C219.614 342.611 221.108 342.316 222.758 342.316C224.95 342.316 226.799 342.713 228.304 343.508C229.822 344.303 230.996 345.399 231.827 346.796C232.67 348.194 233.176 349.783 233.345 351.566H227.925C227.865 350.506 227.654 349.609 227.292 348.874C226.931 348.127 226.383 347.567 225.648 347.194C224.926 346.808 223.962 346.616 222.758 346.616C221.854 346.616 221.066 346.784 220.391 347.122C219.717 347.459 219.151 347.971 218.693 348.657C218.235 349.344 217.892 350.211 217.663 351.259C217.446 352.295 217.338 353.511 217.338 354.908V356.769C217.338 358.13 217.44 359.328 217.645 360.364C217.85 361.388 218.163 362.255 218.584 362.966C219.018 363.664 219.572 364.194 220.247 364.556C220.933 364.905 221.758 365.08 222.722 365.08C223.854 365.08 224.787 364.899 225.522 364.538C226.257 364.176 226.817 363.64 227.202 362.93C227.6 362.219 227.834 361.334 227.907 360.274ZM235.711 359.425V359.045C235.711 357.612 235.916 356.293 236.326 355.089C236.735 353.872 237.331 352.819 238.114 351.927C238.897 351.036 239.861 350.343 241.005 349.85C242.149 349.344 243.462 349.091 244.943 349.091C246.425 349.091 247.744 349.344 248.9 349.85C250.056 350.343 251.026 351.036 251.809 351.927C252.604 352.819 253.206 353.872 253.615 355.089C254.025 356.293 254.229 357.612 254.229 359.045V359.425C254.229 360.846 254.025 362.165 253.615 363.381C253.206 364.586 252.604 365.64 251.809 366.543C251.026 367.434 250.062 368.127 248.918 368.621C247.774 369.114 246.461 369.361 244.979 369.361C243.498 369.361 242.179 369.114 241.023 368.621C239.879 368.127 238.909 367.434 238.114 366.543C237.331 365.64 236.735 364.586 236.326 363.381C235.916 362.165 235.711 360.846 235.711 359.425ZM240.915 359.045V359.425C240.915 360.244 240.987 361.009 241.131 361.719C241.276 362.43 241.505 363.056 241.818 363.598C242.143 364.128 242.565 364.544 243.083 364.845C243.6 365.146 244.233 365.296 244.979 365.296C245.702 365.296 246.322 365.146 246.84 364.845C247.358 364.544 247.774 364.128 248.087 363.598C248.4 363.056 248.629 362.43 248.773 361.719C248.93 361.009 249.008 360.244 249.008 359.425V359.045C249.008 358.25 248.93 357.504 248.773 356.805C248.629 356.095 248.394 355.468 248.069 354.926C247.756 354.372 247.34 353.939 246.822 353.625C246.304 353.312 245.678 353.156 244.943 353.156C244.209 353.156 243.582 353.312 243.064 353.625C242.559 353.939 242.143 354.372 241.818 354.926C241.505 355.468 241.276 356.095 241.131 356.805C240.987 357.504 240.915 358.25 240.915 359.045ZM262.522 353.625V369H257.319V349.452H262.197L262.522 353.625ZM261.763 358.54H260.354C260.354 357.094 260.541 355.793 260.914 354.637C261.287 353.469 261.811 352.475 262.486 351.656C263.16 350.825 263.961 350.193 264.889 349.759C265.828 349.314 266.876 349.091 268.032 349.091C268.948 349.091 269.785 349.223 270.543 349.488C271.302 349.753 271.953 350.175 272.495 350.753C273.049 351.331 273.47 352.096 273.759 353.047C274.06 353.999 274.211 355.161 274.211 356.534V369H268.972V356.516C268.972 355.649 268.851 354.974 268.61 354.493C268.369 354.011 268.014 353.674 267.544 353.481C267.087 353.276 266.521 353.174 265.846 353.174C265.148 353.174 264.539 353.312 264.021 353.589C263.516 353.866 263.094 354.252 262.757 354.746C262.432 355.227 262.185 355.793 262.016 356.444C261.847 357.094 261.763 357.793 261.763 358.54ZM287.743 349.452V353.138H276.361V349.452H287.743ZM279.179 344.628H284.382V363.11C284.382 363.676 284.455 364.11 284.599 364.411C284.756 364.712 284.985 364.923 285.286 365.043C285.587 365.152 285.966 365.206 286.424 365.206C286.749 365.206 287.038 365.194 287.291 365.17C287.556 365.134 287.779 365.098 287.959 365.062L287.978 368.892C287.532 369.036 287.05 369.151 286.532 369.235C286.014 369.319 285.442 369.361 284.816 369.361C283.672 369.361 282.672 369.175 281.817 368.801C280.974 368.416 280.323 367.802 279.866 366.958C279.408 366.115 279.179 365.007 279.179 363.634V344.628ZM295.909 353.716V369H290.706V349.452H295.602L295.909 353.716ZM301.798 349.326L301.708 354.149C301.455 354.113 301.148 354.083 300.787 354.059C300.437 354.023 300.118 354.005 299.829 354.005C299.094 354.005 298.456 354.101 297.914 354.294C297.384 354.475 296.938 354.746 296.577 355.107C296.228 355.468 295.963 355.908 295.782 356.426C295.614 356.944 295.517 357.534 295.493 358.196L294.445 357.871C294.445 356.606 294.572 355.444 294.825 354.384C295.078 353.312 295.445 352.379 295.927 351.584C296.421 350.789 297.023 350.175 297.733 349.741C298.444 349.308 299.257 349.091 300.172 349.091C300.461 349.091 300.757 349.115 301.058 349.163C301.359 349.199 301.606 349.253 301.798 349.326ZM302.882 359.425V359.045C302.882 357.612 303.087 356.293 303.497 355.089C303.906 353.872 304.502 352.819 305.285 351.927C306.068 351.036 307.032 350.343 308.176 349.85C309.32 349.344 310.633 349.091 312.114 349.091C313.596 349.091 314.915 349.344 316.071 349.85C317.227 350.343 318.197 351.036 318.979 351.927C319.774 352.819 320.377 353.872 320.786 355.089C321.196 356.293 321.4 357.612 321.4 359.045V359.425C321.4 360.846 321.196 362.165 320.786 363.381C320.377 364.586 319.774 365.64 318.979 366.543C318.197 367.434 317.233 368.127 316.089 368.621C314.945 369.114 313.632 369.361 312.15 369.361C310.669 369.361 309.35 369.114 308.194 368.621C307.05 368.127 306.08 367.434 305.285 366.543C304.502 365.64 303.906 364.586 303.497 363.381C303.087 362.165 302.882 360.846 302.882 359.425ZM308.085 359.045V359.425C308.085 360.244 308.158 361.009 308.302 361.719C308.447 362.43 308.676 363.056 308.989 363.598C309.314 364.128 309.736 364.544 310.253 364.845C310.771 365.146 311.404 365.296 312.15 365.296C312.873 365.296 313.493 365.146 314.011 364.845C314.529 364.544 314.945 364.128 315.258 363.598C315.571 363.056 315.8 362.43 315.944 361.719C316.101 361.009 316.179 360.244 316.179 359.425V359.045C316.179 358.25 316.101 357.504 315.944 356.805C315.8 356.095 315.565 355.468 315.24 354.926C314.927 354.372 314.511 353.939 313.993 353.625C313.475 353.312 312.849 353.156 312.114 353.156C311.38 353.156 310.753 353.312 310.235 353.625C309.729 353.939 309.314 354.372 308.989 354.926C308.676 355.468 308.447 356.095 308.302 356.805C308.158 357.504 308.085 358.25 308.085 359.045ZM330.09 341.25V369H324.869V341.25H330.09ZM339.882 341.25V369H334.661V341.25H339.882ZM353.179 369.361C351.662 369.361 350.301 369.12 349.096 368.639C347.892 368.145 346.868 367.464 346.025 366.597C345.194 365.73 344.556 364.724 344.11 363.58C343.664 362.424 343.441 361.195 343.441 359.895V359.172C343.441 357.69 343.652 356.335 344.074 355.107C344.495 353.878 345.097 352.812 345.88 351.909C346.675 351.006 347.639 350.313 348.771 349.832C349.903 349.338 351.18 349.091 352.601 349.091C353.986 349.091 355.215 349.32 356.287 349.777C357.359 350.235 358.256 350.885 358.979 351.729C359.713 352.572 360.267 353.583 360.641 354.764C361.014 355.932 361.201 357.233 361.201 358.666V360.834H345.664V357.365H356.088V356.968C356.088 356.245 355.955 355.601 355.69 355.035C355.438 354.457 355.052 353.999 354.534 353.662C354.016 353.324 353.354 353.156 352.547 353.156C351.86 353.156 351.27 353.306 350.776 353.607C350.283 353.909 349.879 354.33 349.566 354.872C349.265 355.414 349.036 356.052 348.879 356.787C348.735 357.51 348.663 358.305 348.663 359.172V359.895C348.663 360.677 348.771 361.4 348.988 362.062C349.217 362.725 349.536 363.297 349.945 363.779C350.367 364.261 350.873 364.634 351.463 364.899C352.065 365.164 352.746 365.296 353.504 365.296C354.444 365.296 355.317 365.116 356.124 364.754C356.943 364.381 357.648 363.821 358.238 363.074L360.767 365.82C360.358 366.41 359.798 366.977 359.087 367.519C358.388 368.061 357.545 368.506 356.558 368.855C355.57 369.193 354.444 369.361 353.179 369.361ZM369.367 353.716V369H364.164V349.452H369.06L369.367 353.716ZM375.256 349.326L375.166 354.149C374.913 354.113 374.606 354.083 374.245 354.059C373.895 354.023 373.576 354.005 373.287 354.005C372.552 354.005 371.914 354.101 371.372 354.294C370.842 354.475 370.396 354.746 370.035 355.107C369.686 355.468 369.421 355.908 369.24 356.426C369.072 356.944 368.975 357.534 368.951 358.196L367.903 357.871C367.903 356.606 368.03 355.444 368.283 354.384C368.536 353.312 368.903 352.379 369.385 351.584C369.879 350.789 370.481 350.175 371.191 349.741C371.902 349.308 372.715 349.091 373.63 349.091C373.919 349.091 374.215 349.115 374.516 349.163C374.817 349.199 375.064 349.253 375.256 349.326Z" fill="#18888F"/>
+<path id="Job" d="M305.307 612.924V594.695H310.709V612.924C310.709 614.683 310.324 616.194 309.553 617.459C308.782 618.712 307.728 619.675 306.391 620.35C305.066 621.024 303.573 621.361 301.911 621.361C300.188 621.361 298.665 621.072 297.34 620.494C296.015 619.916 294.973 619.031 294.214 617.838C293.456 616.634 293.076 615.11 293.076 613.268H298.514C298.514 614.231 298.647 614.996 298.912 615.562C299.189 616.128 299.58 616.532 300.086 616.772C300.592 617.013 301.2 617.134 301.911 617.134C302.597 617.134 303.193 616.971 303.699 616.646C304.205 616.321 304.597 615.845 304.874 615.219C305.163 614.592 305.307 613.828 305.307 612.924ZM314.178 611.425V611.045C314.178 609.612 314.382 608.293 314.792 607.089C315.201 605.872 315.798 604.819 316.581 603.927C317.363 603.036 318.327 602.343 319.471 601.85C320.615 601.344 321.928 601.091 323.41 601.091C324.891 601.091 326.21 601.344 327.366 601.85C328.522 602.343 329.492 603.036 330.275 603.927C331.07 604.819 331.672 605.872 332.082 607.089C332.491 608.293 332.696 609.612 332.696 611.045V611.425C332.696 612.846 332.491 614.165 332.082 615.381C331.672 616.586 331.07 617.64 330.275 618.543C329.492 619.434 328.528 620.127 327.384 620.621C326.24 621.114 324.927 621.361 323.446 621.361C321.964 621.361 320.646 621.114 319.489 620.621C318.345 620.127 317.375 619.434 316.581 618.543C315.798 617.64 315.201 616.586 314.792 615.381C314.382 614.165 314.178 612.846 314.178 611.425ZM319.381 611.045V611.425C319.381 612.244 319.453 613.009 319.598 613.719C319.742 614.43 319.971 615.056 320.284 615.598C320.609 616.128 321.031 616.544 321.549 616.845C322.067 617.146 322.699 617.296 323.446 617.296C324.168 617.296 324.789 617.146 325.307 616.845C325.825 616.544 326.24 616.128 326.553 615.598C326.866 615.056 327.095 614.43 327.24 613.719C327.396 613.009 327.475 612.244 327.475 611.425V611.045C327.475 610.25 327.396 609.504 327.24 608.805C327.095 608.095 326.86 607.468 326.535 606.926C326.222 606.372 325.806 605.939 325.289 605.625C324.771 605.312 324.144 605.156 323.41 605.156C322.675 605.156 322.049 605.312 321.531 605.625C321.025 605.939 320.609 606.372 320.284 606.926C319.971 607.468 319.742 608.095 319.598 608.805C319.453 609.504 319.381 610.25 319.381 611.045ZM335.894 593.25H341.097V616.52L340.573 621H335.894V593.25ZM353.472 611.027V611.407C353.472 612.864 353.316 614.201 353.002 615.417C352.701 616.634 352.232 617.688 351.593 618.579C350.955 619.458 350.16 620.145 349.208 620.639C348.269 621.12 347.161 621.361 345.884 621.361C344.692 621.361 343.656 621.12 342.777 620.639C341.91 620.157 341.181 619.476 340.591 618.597C340.001 617.718 339.525 616.688 339.164 615.508C338.802 614.327 338.531 613.039 338.351 611.642V610.811C338.531 609.413 338.802 608.125 339.164 606.944C339.525 605.764 340.001 604.734 340.591 603.855C341.181 602.976 341.91 602.295 342.777 601.813C343.644 601.332 344.668 601.091 345.848 601.091C347.137 601.091 348.257 601.338 349.208 601.832C350.172 602.313 350.967 603 351.593 603.891C352.232 604.77 352.701 605.818 353.002 607.035C353.316 608.239 353.472 609.57 353.472 611.027ZM348.269 611.407V611.027C348.269 610.232 348.209 609.486 348.088 608.787C347.98 608.076 347.787 607.456 347.51 606.926C347.233 606.384 346.854 605.957 346.372 605.644C345.902 605.33 345.294 605.174 344.547 605.174C343.837 605.174 343.235 605.294 342.741 605.535C342.247 605.776 341.837 606.113 341.512 606.547C341.199 606.98 340.964 607.498 340.808 608.101C340.651 608.691 340.555 609.341 340.519 610.052V612.418C340.555 613.37 340.711 614.213 340.988 614.948C341.277 615.67 341.711 616.243 342.289 616.664C342.879 617.074 343.644 617.278 344.583 617.278C345.318 617.278 345.926 617.134 346.408 616.845C346.89 616.556 347.263 616.146 347.528 615.616C347.805 615.086 347.998 614.466 348.106 613.755C348.215 613.033 348.269 612.25 348.269 611.407Z" fill="#C900FB"/>
+<path id="Job_2" d="M705.307 569.924V551.695H710.709V569.924C710.709 571.683 710.324 573.194 709.553 574.459C708.782 575.712 707.728 576.675 706.391 577.35C705.066 578.024 703.573 578.361 701.911 578.361C700.188 578.361 698.665 578.072 697.34 577.494C696.015 576.916 694.973 576.031 694.214 574.838C693.456 573.634 693.076 572.11 693.076 570.268H698.514C698.514 571.231 698.647 571.996 698.912 572.562C699.189 573.128 699.58 573.532 700.086 573.772C700.592 574.013 701.2 574.134 701.911 574.134C702.597 574.134 703.193 573.971 703.699 573.646C704.205 573.321 704.597 572.845 704.874 572.219C705.163 571.592 705.307 570.828 705.307 569.924ZM714.178 568.425V568.045C714.178 566.612 714.382 565.293 714.792 564.089C715.201 562.872 715.798 561.819 716.581 560.927C717.363 560.036 718.327 559.343 719.471 558.85C720.615 558.344 721.928 558.091 723.41 558.091C724.891 558.091 726.21 558.344 727.366 558.85C728.522 559.343 729.492 560.036 730.275 560.927C731.07 561.819 731.672 562.872 732.082 564.089C732.491 565.293 732.696 566.612 732.696 568.045V568.425C732.696 569.846 732.491 571.165 732.082 572.381C731.672 573.586 731.07 574.64 730.275 575.543C729.492 576.434 728.528 577.127 727.384 577.621C726.24 578.114 724.927 578.361 723.446 578.361C721.964 578.361 720.646 578.114 719.489 577.621C718.345 577.127 717.375 576.434 716.581 575.543C715.798 574.64 715.201 573.586 714.792 572.381C714.382 571.165 714.178 569.846 714.178 568.425ZM719.381 568.045V568.425C719.381 569.244 719.453 570.009 719.598 570.719C719.742 571.43 719.971 572.056 720.284 572.598C720.609 573.128 721.031 573.544 721.549 573.845C722.067 574.146 722.699 574.296 723.446 574.296C724.168 574.296 724.789 574.146 725.307 573.845C725.825 573.544 726.24 573.128 726.553 572.598C726.866 572.056 727.095 571.43 727.24 570.719C727.396 570.009 727.475 569.244 727.475 568.425V568.045C727.475 567.25 727.396 566.504 727.24 565.805C727.095 565.095 726.86 564.468 726.535 563.926C726.222 563.372 725.806 562.939 725.289 562.625C724.771 562.312 724.144 562.156 723.41 562.156C722.675 562.156 722.049 562.312 721.531 562.625C721.025 562.939 720.609 563.372 720.284 563.926C719.971 564.468 719.742 565.095 719.598 565.805C719.453 566.504 719.381 567.25 719.381 568.045ZM735.894 550.25H741.097V573.52L740.573 578H735.894V550.25ZM753.472 568.027V568.407C753.472 569.864 753.316 571.201 753.002 572.417C752.701 573.634 752.232 574.688 751.593 575.579C750.955 576.458 750.16 577.145 749.208 577.639C748.269 578.12 747.161 578.361 745.884 578.361C744.692 578.361 743.656 578.12 742.777 577.639C741.91 577.157 741.181 576.476 740.591 575.597C740.001 574.718 739.525 573.688 739.164 572.508C738.802 571.327 738.531 570.039 738.351 568.642V567.811C738.531 566.413 738.802 565.125 739.164 563.944C739.525 562.764 740.001 561.734 740.591 560.855C741.181 559.976 741.91 559.295 742.777 558.813C743.644 558.332 744.668 558.091 745.848 558.091C747.137 558.091 748.257 558.338 749.208 558.832C750.172 559.313 750.967 560 751.593 560.891C752.232 561.77 752.701 562.818 753.002 564.035C753.316 565.239 753.472 566.57 753.472 568.027ZM748.269 568.407V568.027C748.269 567.232 748.209 566.486 748.088 565.787C747.98 565.076 747.787 564.456 747.51 563.926C747.233 563.384 746.854 562.957 746.372 562.644C745.902 562.33 745.294 562.174 744.547 562.174C743.837 562.174 743.235 562.294 742.741 562.535C742.247 562.776 741.837 563.113 741.512 563.547C741.199 563.98 740.964 564.498 740.808 565.101C740.651 565.691 740.555 566.341 740.519 567.052V569.418C740.555 570.37 740.711 571.213 740.988 571.948C741.277 572.67 741.711 573.243 742.289 573.664C742.879 574.074 743.644 574.278 744.583 574.278C745.318 574.278 745.926 574.134 746.408 573.845C746.89 573.556 747.263 573.146 747.528 572.616C747.805 572.086 747.998 571.466 748.106 570.755C748.215 570.033 748.269 569.25 748.269 568.407Z" fill="#C900FB"/>
+<path id="Mailer" d="M571.16 243.695H575.749L582.506 263.008L589.263 243.695H593.852L584.349 270H580.663L571.16 243.695ZM568.685 243.695H573.256L574.087 262.521V270H568.685V243.695ZM591.756 243.695H596.345V270H590.925V262.521L591.756 243.695ZM611.322 265.592V256.884C611.322 256.257 611.219 255.722 611.015 255.276C610.81 254.818 610.491 254.463 610.057 254.21C609.636 253.957 609.088 253.831 608.413 253.831C607.835 253.831 607.335 253.933 606.914 254.138C606.492 254.33 606.167 254.613 605.938 254.987C605.709 255.348 605.595 255.776 605.595 256.27H600.392C600.392 255.438 600.584 254.65 600.97 253.903C601.355 253.156 601.915 252.5 602.65 251.934C603.385 251.355 604.258 250.904 605.27 250.579C606.293 250.253 607.438 250.091 608.702 250.091C610.22 250.091 611.569 250.344 612.749 250.85C613.929 251.355 614.857 252.114 615.531 253.126C616.218 254.138 616.561 255.402 616.561 256.92V265.285C616.561 266.357 616.627 267.236 616.76 267.922C616.892 268.597 617.085 269.187 617.338 269.693V270H612.081C611.828 269.47 611.635 268.808 611.502 268.013C611.382 267.206 611.322 266.399 611.322 265.592ZM612.008 258.094L612.044 261.039H609.136C608.449 261.039 607.853 261.117 607.347 261.274C606.841 261.431 606.426 261.653 606.101 261.942C605.775 262.219 605.535 262.545 605.378 262.918C605.233 263.291 605.161 263.701 605.161 264.146C605.161 264.592 605.264 264.996 605.468 265.357C605.673 265.706 605.968 265.983 606.354 266.188C606.739 266.381 607.191 266.477 607.708 266.477C608.491 266.477 609.172 266.32 609.75 266.007C610.328 265.694 610.774 265.309 611.087 264.851C611.412 264.393 611.581 263.96 611.593 263.55L612.966 265.754C612.773 266.248 612.508 266.76 612.171 267.29C611.846 267.82 611.43 268.32 610.924 268.79C610.418 269.247 609.81 269.627 609.1 269.928C608.389 270.217 607.546 270.361 606.57 270.361C605.33 270.361 604.204 270.114 603.192 269.621C602.192 269.115 601.397 268.422 600.807 267.543C600.229 266.652 599.94 265.64 599.94 264.508C599.94 263.484 600.133 262.575 600.518 261.78C600.903 260.985 601.47 260.316 602.216 259.774C602.975 259.22 603.921 258.805 605.053 258.528C606.185 258.239 607.498 258.094 608.991 258.094H612.008ZM626.064 250.452V270H620.843V250.452H626.064ZM620.518 245.357C620.518 244.599 620.783 243.972 621.312 243.479C621.842 242.985 622.553 242.738 623.444 242.738C624.324 242.738 625.028 242.985 625.558 243.479C626.1 243.972 626.371 244.599 626.371 245.357C626.371 246.116 626.1 246.743 625.558 247.236C625.028 247.73 624.324 247.977 623.444 247.977C622.553 247.977 621.842 247.73 621.312 247.236C620.783 246.743 620.518 246.116 620.518 245.357ZM635.856 242.25V270H630.635V242.25H635.856ZM649.153 270.361C647.635 270.361 646.274 270.12 645.07 269.639C643.865 269.145 642.842 268.464 641.999 267.597C641.167 266.73 640.529 265.724 640.083 264.58C639.638 263.424 639.415 262.195 639.415 260.895V260.172C639.415 258.69 639.626 257.335 640.047 256.107C640.469 254.878 641.071 253.812 641.854 252.909C642.649 252.006 643.612 251.313 644.745 250.832C645.877 250.338 647.153 250.091 648.575 250.091C649.96 250.091 651.188 250.32 652.26 250.777C653.332 251.235 654.229 251.885 654.952 252.729C655.687 253.572 656.241 254.583 656.614 255.764C656.988 256.932 657.174 258.233 657.174 259.666V261.834H641.637V258.365H652.062V257.968C652.062 257.245 651.929 256.601 651.664 256.035C651.411 255.457 651.026 254.999 650.508 254.662C649.99 254.324 649.327 254.156 648.521 254.156C647.834 254.156 647.244 254.306 646.75 254.607C646.256 254.909 645.853 255.33 645.54 255.872C645.238 256.414 645.01 257.052 644.853 257.787C644.708 258.51 644.636 259.305 644.636 260.172V260.895C644.636 261.677 644.745 262.4 644.961 263.062C645.19 263.725 645.509 264.297 645.919 264.779C646.34 265.261 646.846 265.634 647.437 265.899C648.039 266.164 648.719 266.296 649.478 266.296C650.417 266.296 651.291 266.116 652.098 265.754C652.917 265.381 653.621 264.821 654.211 264.074L656.741 266.82C656.331 267.41 655.771 267.977 655.061 268.519C654.362 269.061 653.519 269.506 652.531 269.855C651.544 270.193 650.417 270.361 649.153 270.361ZM665.34 254.716V270H660.137V250.452H665.033L665.34 254.716ZM671.23 250.326L671.14 255.149C670.887 255.113 670.58 255.083 670.218 255.059C669.869 255.023 669.55 255.005 669.261 255.005C668.526 255.005 667.888 255.101 667.346 255.294C666.816 255.475 666.37 255.746 666.009 256.107C665.66 256.468 665.395 256.908 665.214 257.426C665.045 257.944 664.949 258.534 664.925 259.196L663.877 258.871C663.877 257.606 664.003 256.444 664.256 255.384C664.509 254.312 664.877 253.379 665.358 252.584C665.852 251.789 666.454 251.175 667.165 250.741C667.876 250.308 668.689 250.091 669.604 250.091C669.893 250.091 670.188 250.115 670.489 250.163C670.79 250.199 671.037 250.253 671.23 250.326Z" fill="#5B188F"/>
+<path id="Model_2" d="M706.865 372.695H711.454L718.21 392.008L724.967 372.695H729.556L720.053 399H716.368L706.865 372.695ZM704.39 372.695H708.96L709.792 391.521V399H704.39V372.695ZM727.46 372.695H732.049V399H726.629V391.521L727.46 372.695ZM735.645 389.425V389.045C735.645 387.612 735.849 386.293 736.259 385.089C736.668 383.872 737.264 382.819 738.047 381.927C738.83 381.036 739.794 380.343 740.938 379.85C742.082 379.344 743.395 379.091 744.876 379.091C746.358 379.091 747.677 379.344 748.833 379.85C749.989 380.343 750.959 381.036 751.742 381.927C752.537 382.819 753.139 383.872 753.548 385.089C753.958 386.293 754.163 387.612 754.163 389.045V389.425C754.163 390.846 753.958 392.165 753.548 393.381C753.139 394.586 752.537 395.64 751.742 396.543C750.959 397.434 749.995 398.127 748.851 398.621C747.707 399.114 746.394 399.361 744.913 399.361C743.431 399.361 742.112 399.114 740.956 398.621C739.812 398.127 738.842 397.434 738.047 396.543C737.264 395.64 736.668 394.586 736.259 393.381C735.849 392.165 735.645 390.846 735.645 389.425ZM740.848 389.045V389.425C740.848 390.244 740.92 391.009 741.064 391.719C741.209 392.43 741.438 393.056 741.751 393.598C742.076 394.128 742.498 394.544 743.016 394.845C743.534 395.146 744.166 395.296 744.913 395.296C745.635 395.296 746.256 395.146 746.773 394.845C747.291 394.544 747.707 394.128 748.02 393.598C748.333 393.056 748.562 392.43 748.707 391.719C748.863 391.009 748.941 390.244 748.941 389.425V389.045C748.941 388.25 748.863 387.504 748.707 386.805C748.562 386.095 748.327 385.468 748.002 384.926C747.689 384.372 747.273 383.939 746.755 383.625C746.237 383.312 745.611 383.156 744.876 383.156C744.142 383.156 743.515 383.312 742.998 383.625C742.492 383.939 742.076 384.372 741.751 384.926C741.438 385.468 741.209 386.095 741.064 386.805C740.92 387.504 740.848 388.25 740.848 389.045ZM768.905 394.736V371.25H774.144V399H769.429L768.905 394.736ZM756.547 389.461V389.082C756.547 387.588 756.716 386.233 757.053 385.017C757.39 383.788 757.884 382.734 758.535 381.855C759.185 380.976 759.986 380.295 760.938 379.813C761.889 379.332 762.973 379.091 764.189 379.091C765.334 379.091 766.333 379.332 767.188 379.813C768.056 380.295 768.79 380.982 769.393 381.873C770.007 382.752 770.501 383.794 770.874 384.999C771.247 386.191 771.518 387.498 771.687 388.919V389.75C771.518 391.111 771.247 392.376 770.874 393.544C770.501 394.712 770.007 395.736 769.393 396.615C768.79 397.482 768.056 398.157 767.188 398.639C766.321 399.12 765.31 399.361 764.153 399.361C762.937 399.361 761.853 399.114 760.901 398.621C759.962 398.127 759.167 397.434 758.517 396.543C757.878 395.652 757.39 394.604 757.053 393.399C756.716 392.195 756.547 390.882 756.547 389.461ZM761.75 389.082V389.461C761.75 390.268 761.811 391.021 761.931 391.719C762.064 392.418 762.274 393.038 762.563 393.58C762.865 394.11 763.25 394.526 763.72 394.827C764.201 395.116 764.786 395.26 765.472 395.26C766.363 395.26 767.098 395.062 767.676 394.664C768.254 394.255 768.694 393.694 768.995 392.984C769.308 392.273 769.489 391.454 769.537 390.527V388.16C769.501 387.401 769.393 386.721 769.212 386.119C769.043 385.504 768.79 384.98 768.453 384.547C768.128 384.113 767.718 383.776 767.225 383.535C766.743 383.294 766.171 383.174 765.508 383.174C764.834 383.174 764.256 383.33 763.774 383.644C763.292 383.945 762.901 384.36 762.6 384.89C762.311 385.42 762.094 386.046 761.949 386.769C761.817 387.48 761.75 388.25 761.75 389.082ZM787.206 399.361C785.688 399.361 784.327 399.12 783.123 398.639C781.919 398.145 780.895 397.464 780.052 396.597C779.221 395.73 778.582 394.724 778.137 393.58C777.691 392.424 777.468 391.195 777.468 389.895V389.172C777.468 387.69 777.679 386.335 778.101 385.107C778.522 383.878 779.124 382.812 779.907 381.909C780.702 381.006 781.666 380.313 782.798 379.832C783.93 379.338 785.207 379.091 786.628 379.091C788.013 379.091 789.242 379.32 790.313 379.777C791.385 380.235 792.283 380.885 793.005 381.729C793.74 382.572 794.294 383.583 794.667 384.764C795.041 385.932 795.228 387.233 795.228 388.666V390.834H779.69V387.365H790.115V386.968C790.115 386.245 789.982 385.601 789.717 385.035C789.464 384.457 789.079 383.999 788.561 383.662C788.043 383.324 787.381 383.156 786.574 383.156C785.887 383.156 785.297 383.306 784.803 383.607C784.309 383.909 783.906 384.33 783.593 384.872C783.292 385.414 783.063 386.052 782.906 386.787C782.762 387.51 782.689 388.305 782.689 389.172V389.895C782.689 390.677 782.798 391.4 783.015 392.062C783.243 392.725 783.563 393.297 783.972 393.779C784.394 394.261 784.9 394.634 785.49 394.899C786.092 395.164 786.772 395.296 787.531 395.296C788.471 395.296 789.344 395.116 790.151 394.754C790.97 394.381 791.674 393.821 792.265 393.074L794.794 395.82C794.384 396.41 793.824 396.977 793.114 397.519C792.415 398.061 791.572 398.506 790.584 398.855C789.597 399.193 788.471 399.361 787.206 399.361ZM803.683 371.25V399H798.461V371.25H803.683Z" fill="#FB00E2"/>
+<g id="Group 6">
+<path id="Vector 4" d="M330.5 416L495.5 269L665 406.5L511.5 516.5M330.5 416L511.5 516.5M330.5 416L395 573L671.5 534L495.5 273.5L511.5 516.5" stroke="#8584B3" stroke-width="6"/>
+<circle id="Ellipse 1" cx="329.5" cy="414.5" r="15.5" fill="#391B89"/>
+<circle id="Ellipse 2" cx="394.5" cy="571.5" r="15.5" fill="#391B89"/>
+<circle id="Ellipse 3" cx="509.5" cy="516.5" r="15.5" fill="#391B89"/>
+<circle id="Ellipse 4" cx="669.5" cy="531.5" r="15.5" fill="#391B89"/>
+<circle id="Ellipse 6" cx="664.5" cy="405.5" r="15.5" fill="#391B89"/>
+<circle id="Ellipse 5" cx="493.5" cy="269.5" r="15.5" fill="#391B89"/>
+</g>
+</g>
+<path id="Private"
+      class="fragment"
+      data-fragment-index="1" d="M235.455 191.555C238.225 191.555 240.321 192.181 241.742 193.434C243.175 194.675 243.892 196.469 243.892 198.818C243.892 201.167 243.175 202.967 241.742 204.22C240.321 205.472 238.225 206.099 235.455 206.099H232.745V209.296H236.666C236.955 209.296 237.177 209.351 237.334 209.459C237.491 209.555 237.605 209.736 237.677 210.001C237.762 210.266 237.804 210.651 237.804 211.157C237.804 211.663 237.762 212.049 237.677 212.313C237.605 212.578 237.491 212.759 237.334 212.855C237.177 212.952 236.955 213 236.666 213H225.573C225.284 213 225.061 212.952 224.904 212.855C224.748 212.759 224.627 212.578 224.543 212.313C224.471 212.049 224.435 211.663 224.435 211.157C224.435 210.651 224.471 210.266 224.543 210.001C224.627 209.736 224.748 209.555 224.904 209.459C225.061 209.351 225.284 209.296 225.573 209.296H228.229V195.259H225.573C225.284 195.259 225.061 195.211 224.904 195.114C224.748 195.018 224.627 194.837 224.543 194.572C224.471 194.307 224.435 193.922 224.435 193.416C224.435 192.91 224.471 192.525 224.543 192.26C224.627 191.995 224.748 191.814 224.904 191.718C225.061 191.609 225.284 191.555 225.573 191.555H235.455ZM232.745 202.214H234.895C236.328 202.214 237.406 201.937 238.129 201.383C238.864 200.829 239.231 199.974 239.231 198.818C239.231 197.662 238.864 196.812 238.129 196.271C237.406 195.716 236.328 195.439 234.895 195.439H232.745V202.214ZM262.284 195.909C263.307 195.909 264.271 196.246 265.174 196.921C265.704 197.306 265.969 197.812 265.969 198.438C265.969 198.836 265.861 199.306 265.644 199.848C265.427 200.39 265.18 200.799 264.903 201.076C264.638 201.353 264.355 201.492 264.054 201.492C263.886 201.492 263.705 201.444 263.512 201.347C262.838 200.974 262.139 200.787 261.417 200.787C260.489 200.787 259.622 201.082 258.815 201.672C258.008 202.263 257.358 203.076 256.864 204.111C256.382 205.147 256.141 206.303 256.141 207.58V209.296H261.326C261.615 209.296 261.838 209.351 261.995 209.459C262.151 209.555 262.266 209.736 262.338 210.001C262.422 210.266 262.464 210.651 262.464 211.157C262.464 211.663 262.422 212.049 262.338 212.313C262.266 212.578 262.151 212.759 261.995 212.855C261.838 212.952 261.615 213 261.326 213H248.969C248.68 213 248.457 212.952 248.3 212.855C248.144 212.759 248.023 212.578 247.939 212.313C247.867 212.049 247.831 211.663 247.831 211.157C247.831 210.651 247.867 210.266 247.939 210.001C248.023 209.736 248.144 209.555 248.3 209.459C248.457 209.351 248.68 209.296 248.969 209.296H251.625V200.01H249.511C249.222 200.01 248.999 199.962 248.842 199.866C248.686 199.769 248.565 199.589 248.481 199.324C248.409 199.059 248.373 198.673 248.373 198.167C248.373 197.662 248.409 197.276 248.481 197.011C248.565 196.746 248.686 196.566 248.842 196.469C248.999 196.361 249.222 196.307 249.511 196.307H254.461C254.87 196.307 255.16 196.397 255.328 196.578C255.509 196.746 255.599 197.035 255.599 197.445V201.365C256.502 199.619 257.538 198.276 258.707 197.336C259.887 196.385 261.079 195.909 262.284 195.909ZM280.188 196.307C280.597 196.307 280.886 196.397 281.055 196.578C281.235 196.746 281.326 197.035 281.326 197.445V209.296H286.402C286.691 209.296 286.914 209.351 287.071 209.459C287.227 209.555 287.342 209.736 287.414 210.001C287.498 210.266 287.541 210.651 287.541 211.157C287.541 211.663 287.498 212.049 287.414 212.313C287.342 212.578 287.227 212.759 287.071 212.855C286.914 212.952 286.691 213 286.402 213H271.877C271.588 213 271.365 212.952 271.208 212.855C271.052 212.759 270.931 212.578 270.847 212.313C270.775 212.049 270.739 211.663 270.739 211.157C270.739 210.651 270.775 210.266 270.847 210.001C270.931 209.736 271.052 209.555 271.208 209.459C271.365 209.351 271.588 209.296 271.877 209.296H276.809V200.01H272.961C272.672 200.01 272.449 199.962 272.292 199.866C272.136 199.769 272.015 199.589 271.931 199.324C271.859 199.059 271.823 198.673 271.823 198.167C271.823 197.662 271.859 197.276 271.931 197.011C272.015 196.746 272.136 196.566 272.292 196.469C272.449 196.361 272.672 196.307 272.961 196.307H280.188ZM279.013 188.375C279.868 188.375 280.465 188.466 280.802 188.646C281.151 188.815 281.326 189.104 281.326 189.514V192.477C281.326 192.886 281.163 193.181 280.838 193.362C280.525 193.53 279.947 193.615 279.104 193.615C278.26 193.615 277.664 193.53 277.315 193.362C276.978 193.181 276.809 192.886 276.809 192.477V189.514C276.809 189.092 276.966 188.797 277.279 188.628C277.592 188.46 278.17 188.375 279.013 188.375ZM310.232 196.307C310.521 196.307 310.744 196.361 310.9 196.469C311.057 196.566 311.171 196.746 311.244 197.011C311.328 197.276 311.37 197.662 311.37 198.167C311.37 198.673 311.328 199.059 311.244 199.324C311.171 199.589 311.057 199.769 310.9 199.866C310.744 199.962 310.521 200.01 310.232 200.01H309.003L303.71 212.223C303.529 212.645 303.234 212.946 302.825 213.126C302.415 213.307 301.789 213.397 300.946 213.397C300.103 213.397 299.482 213.307 299.085 213.126C298.688 212.946 298.398 212.645 298.218 212.223L292.96 200.01H291.768C291.479 200.01 291.256 199.962 291.1 199.866C290.943 199.769 290.823 199.589 290.738 199.324C290.666 199.059 290.63 198.673 290.63 198.167C290.63 197.662 290.666 197.276 290.738 197.011C290.823 196.746 290.943 196.566 291.1 196.469C291.256 196.361 291.479 196.307 291.768 196.307H299.067C299.356 196.307 299.579 196.361 299.735 196.469C299.892 196.566 300.006 196.746 300.079 197.011C300.163 197.276 300.205 197.662 300.205 198.167C300.205 198.673 300.163 199.059 300.079 199.324C300.006 199.589 299.892 199.769 299.735 199.866C299.579 199.962 299.356 200.01 299.067 200.01H297.856L301.054 207.978L304.288 200.01H303.294C303.005 200.01 302.783 199.962 302.626 199.866C302.469 199.769 302.349 199.589 302.265 199.324C302.192 199.059 302.156 198.673 302.156 198.167C302.156 197.662 302.192 197.276 302.265 197.011C302.349 196.746 302.469 196.566 302.626 196.469C302.783 196.361 303.005 196.307 303.294 196.307H310.232ZM322.987 195.909C325.637 195.909 327.552 196.481 328.732 197.625C329.912 198.77 330.502 200.408 330.502 202.54V207.761C330.502 208.243 330.605 208.622 330.81 208.899C331.014 209.164 331.309 209.296 331.695 209.296H332.255C332.544 209.296 332.767 209.351 332.923 209.459C333.08 209.555 333.194 209.736 333.267 210.001C333.351 210.266 333.393 210.651 333.393 211.157C333.393 211.663 333.351 212.049 333.267 212.313C333.194 212.578 333.08 212.759 332.923 212.855C332.767 212.952 332.544 213 332.255 213H330.231C329.485 213 328.822 212.849 328.244 212.548C327.678 212.235 327.244 211.747 326.943 211.085C325.992 211.82 324.986 212.392 323.926 212.801C322.866 213.199 321.776 213.397 320.656 213.397C319.295 213.397 318.121 213.169 317.133 212.711C316.146 212.241 315.387 211.579 314.857 210.724C314.339 209.856 314.08 208.839 314.08 207.67C314.08 205.984 314.676 204.677 315.869 203.75C317.061 202.823 318.729 202.359 320.873 202.359C322.475 202.359 324.179 202.54 325.986 202.901V202.377C325.986 201.57 325.733 200.974 325.227 200.588C324.721 200.203 323.83 200.01 322.553 200.01C321.843 200.01 321.048 200.101 320.168 200.281C319.301 200.45 318.44 200.679 317.585 200.968C317.38 201.028 317.206 201.058 317.061 201.058C316.76 201.058 316.489 200.95 316.248 200.733C316.019 200.504 315.808 200.125 315.616 199.595C315.435 199.065 315.345 198.631 315.345 198.294C315.345 197.68 315.622 197.27 316.176 197.065C317.248 196.68 318.386 196.391 319.59 196.198C320.795 196.006 321.927 195.909 322.987 195.909ZM321.325 206.081C320.482 206.081 319.837 206.231 319.392 206.532C318.958 206.833 318.741 207.273 318.741 207.851C318.741 208.417 318.952 208.851 319.374 209.152C319.807 209.441 320.427 209.585 321.234 209.585C322.065 209.585 322.884 209.423 323.691 209.098C324.51 208.76 325.275 208.303 325.986 207.725V206.568C324.396 206.243 322.842 206.081 321.325 206.081ZM343.041 191.158C343.607 191.158 344.04 191.2 344.341 191.284C344.654 191.356 344.871 191.471 344.992 191.627C345.112 191.784 345.172 192.007 345.172 192.296V197.391H351.875C352.297 197.391 352.592 197.529 352.76 197.806C352.929 198.083 353.013 198.595 353.013 199.342C353.013 200.089 352.929 200.6 352.76 200.877C352.592 201.142 352.297 201.275 351.875 201.275H345.172V206.297C345.172 208.297 345.949 209.296 347.503 209.296C348.057 209.296 348.701 209.176 349.436 208.935C350.183 208.682 351.05 208.333 352.038 207.887C352.303 207.779 352.513 207.725 352.67 207.725C352.923 207.725 353.158 207.833 353.375 208.05C353.591 208.255 353.796 208.598 353.989 209.08C354.206 209.622 354.314 210.061 354.314 210.398C354.314 210.663 354.248 210.886 354.115 211.067C353.995 211.236 353.808 211.386 353.555 211.519C351.074 212.771 348.924 213.397 347.105 213.397C345.01 213.397 343.408 212.813 342.3 211.645C341.204 210.477 340.656 208.772 340.656 206.532V201.275H337.169C336.747 201.275 336.452 201.142 336.284 200.877C336.115 200.6 336.031 200.089 336.031 199.342C336.031 198.595 336.115 198.083 336.284 197.806C336.452 197.529 336.747 197.391 337.169 197.391H340.656V192.296C340.656 191.886 340.836 191.597 341.198 191.429C341.571 191.248 342.185 191.158 343.041 191.158ZM367.81 195.909C369.64 195.909 371.2 196.307 372.489 197.102C373.778 197.884 374.747 198.98 375.397 200.39C376.06 201.787 376.391 203.389 376.391 205.195C376.391 205.605 376.301 205.894 376.12 206.062C375.951 206.231 375.662 206.315 375.253 206.315H363.654C363.883 207.279 364.371 208.02 365.118 208.538C365.876 209.043 366.834 209.296 367.99 209.296C369.857 209.296 371.881 208.965 374.061 208.303C374.205 208.255 374.35 208.23 374.494 208.23C374.759 208.23 374.988 208.351 375.181 208.592C375.373 208.833 375.548 209.242 375.705 209.82C375.825 210.266 375.885 210.645 375.885 210.958C375.885 211.272 375.813 211.519 375.668 211.699C375.536 211.868 375.313 212.006 375 212.115C373.796 212.512 372.567 212.825 371.314 213.054C370.062 213.283 368.833 213.397 367.629 213.397C365.798 213.397 364.22 213.024 362.896 212.277C361.571 211.531 360.559 210.501 359.86 209.188C359.174 207.863 358.831 206.352 358.831 204.653C358.831 202.967 359.192 201.462 359.915 200.137C360.637 198.812 361.679 197.776 363.04 197.029C364.401 196.283 365.991 195.909 367.81 195.909ZM367.81 200.01C365.605 200.01 364.244 200.938 363.727 202.792H371.676C371.471 201.913 371.031 201.233 370.357 200.751C369.694 200.257 368.845 200.01 367.81 200.01Z" fill="#391B89" fill-opacity="0.4"/>
+</g>
+<path id="public_interface"
+      class="fragment"
+      data-fragment-index="4" fill-rule="evenodd" clip-rule="evenodd" d="M452.004 63H452V141H507V63H506.996C506.729 77.9571 494.521 90 479.5 90C464.479 90 452.271 77.9571 452.004 63Z" fill="url(#paint0_linear_113_644)"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_113_644" x1="479" y1="141" x2="479" y2="63" gradientUnits="userSpaceOnUse">
+<stop offset="0.0851266" stop-color="#391B89"/>
+<stop offset="1" stop-color="#FB00E2" stop-opacity="0.67"/>
+</linearGradient>
+</defs>
+</svg>
+
+
+Notes:
+
+
+Privacy in packages is the same thing but not at the method level but at the folder level.
+
+Packwerk makes most of the code inside your package 
+
+private 
+
+(slide)
+
+
+and draws a strong boundary
+
+ (slide)
+
+so you can call classes, constants and modules from within the package without fear of breaking
+anything outside it.
+
+To provide others with your packages functionality, you will need to make some code public
+
+(slide)
+
+You'll open your package to the world but only through specific classes and module you define as public
+
+(slide)
+
+---
+
+#### Privacy
+
+```text[|3-9|7-8]
+music_universe/
+  packages/
+    teacher_app
+      app/
+        models/
+        jobs/
+        public/
+          [all public code goes here]
+      package.yml
+```
+
+Notes:
+In your package, 
+
+(slide)
+
+everything will be private
+
+(slide)
+
+except for anything under app/public
+
+You may configure this any way you want though.
+
+---
+#### The public interface
+
+```ruby
+module Octokit # i.e. Our engine's module
+  class Client # The interface class
+    def search_code(query, options = {}) # An interface method
+      # That calls private classes and methods within the library
+      # to make HTTP requests to the API
+      # In that sense, the API is like our private code in the package.
+    end
+  end
+end
+```
+
+Notes:
+I like to think of the public interface of a package as the interface for a gem that wraps an API.
+
+For example, I've been working with octokit lately, the official ruby gem for the github api and it looks like this:
+
+(read code)
+
+---
+
+```ruby
+module TeacherApp
+  module Billing
+    def self.client
+      Client.new
+    end
+
+    class Client
+      def schedule_monthly_reminder(...)
+        MonthlyReminderJob.perform # private
+      end
+    end
+  end
+end
+```
+
+```ruby
+# somewher else
+
+teacher_app_billing_client = TeacherApp::Billing.client
+teacher_app_billing_client.schedule_monthly_reminder
+```
+
+Notes:
+
+In the case of our music universe app, a hypothetical public interface for the teacher app's billing package might look somethign like this
+
+---
+
+
+#### Dependency
+
+![dependency](images/packwerk/dependency.png)
+
+Notes:
+
+The Second concept is Dependency.
+
+Packwerk requires you to be specific... to be intentional about the relations between packages. 
+If you know a package depends on another, you need to declare it explicitly.
+
+For example
+the Teacher app package depends on the Core package because it uses the ApplicationRecord class
+The Student app package also depends on the Core package because it uses that same class.
+
+---
+
+#### Am I doing it right?
+
+---
+#### Violations
+![dependency](images/packwerk/violations/0.png)
+Notes:
+
+---
+#### Violations
+![dependency](images/packwerk/violations/1.png)
+Notes:
+---
+#### Violations
+![dependency](images/packwerk/violations/2.png)
+Notes:
+---
+#### Violations
+![dependency](images/packwerk/violations/3.png)
+Notes:
+---
+
+#### Running packwerk
+
+![dependency](images/packwerk/check.gif)
+
+Notes:
+
+You can run packwerk as a pre commit hook,
+ir in a CI step
+And it even runs in VS code as a plugin and gives you immediate feedback
+
+---
+
+#### Packwerk
+Docs: www.github.com/shopify/packwerk
+
+Talk: Laying the cultural and technical foundation for Big Rails by Alex Evanczuk
+
+Notes:
+
+The docs for packwerk are very thorough and I really suggest you go read them.
+
+and there's also a talk from Alex Evanczuk called
+
+Laying the cultural and technical foundation for Big Rails - 
+
+---
+
+#### The architecture spectrum
+
+![spectrum 4](images/spectrum/5.svg)
+
+Notes:
+
+Engines acting as very simple code loading assistants for our modularised architecture
+
+plus
+
+Packwerk to help us keep things neatly organised is the last piece of the architecture spectrum.
+
+By doing this, any package is a very few steps away from becoming a microservice if you reach the point where it no longer makes sense to keep it in your monolith. The reasons for extraction become less and less about code quality and entanglement and more about operational constraints.
+
+---
+
+# 🚂
+
+Notes:
+
+I personally feel much better now knowing there is a path, that there are techniques and that
+they are, for the most part, already part of Rails or designed to work very closely to rails and its conventions.
+
+---
+
+#### This is just the beginning
+
+Notes:
+
+Try it out, get a feel for it. Extract some stuff. Read the docs. 
+
+I envision a future where this is no longer a niche technique of large-scale organisations like shopify but a common architectural pattern in Rails.
+
+I would love to see generators that build lean engines for you.
+
+I would love to see scaffolding work not just in the regular app folder but inside these lean engines.
+
+I would love for gem authors to think outside the box and create or update their gems to work with alternative ways of structuring our code
+
+I would love to see examples of engines from a single rails app being served by multiple clusters of servers... each with different resources.
+
+I would love for you to try all of this out and write about it and make videos so more people try it.
+
+
+And finally, I hope these tools reignite your passion for writing beautiful code and beautiful systems that are a joy to work in, regardless of their scale.
+
+---
+
+#### Thank you
+

@@ -8,16 +8,31 @@
 
 		<link rel="stylesheet" href="dist/reset.css">
 		<link rel="stylesheet" href="dist/reveal.css">
-		<link rel="stylesheet" href="dist/theme/black.css">
+		<link rel="stylesheet" href="dist/theme/night.css">
 
 		<!-- Theme used for syntax highlighted code -->
-		<link rel="stylesheet" href="plugin/highlight/monokai.css">
+		<link rel="stylesheet" href="plugin/highlight/atom-one-dark.css">
+		<style>
+			.hljs-ln-numbers{ display: none !important; }
+			figcaption{
+				font-size: 1.125rem;
+				color: gray;
+				font-style: italic;
+			}
+			del {
+				opacity: 40%;
+			}
+
+			.grid { display: grid; }
+			.grid-rows-2 { grid-template-rows: repeat(2, minmax(0, 1fr)); }
+			.grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+			.gap-4 { gap: 1rem }
+		</style>
 	</head>
 	<body>
 		<div class="reveal">
 			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
+				<section data-markdown="bulk_talk.md">
 			</div>
 		</div>
 
@@ -31,6 +46,7 @@
 			// - https://revealjs.com/config/
 			Reveal.initialize({
 				hash: true,
+				slideNumber: true,
 
 				// Learn about plugins: https://revealjs.com/plugins/
 				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
